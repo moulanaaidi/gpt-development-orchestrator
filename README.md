@@ -2,9 +2,12 @@
 
 A reusable, GPT-only development workflow for Codex projects.
 
-The Sol controller owns architecture, planning, design, routing, integration,
-and final review. It delegates bounded implementation tasks to GPT models
-exposed by the current Codex session. Model versions are selected per task.
+Sol owns the actual plan, architecture, design, routing, integration, and
+independent final review. Every code or file implementation task, including
+small changes, is implemented by a bounded lower-GPT worker selected from
+current host-advertised choices and invoked through native delegation. Missing
+Sol, worker, delegation, or identity evidence means fail closed, not a local
+implementation fallback. Read-only questions and reviews need no worker.
 
 It is product-neutral. Approval rules and business governance remain in each
 target repository.
@@ -15,7 +18,7 @@ target repository.
 - Session-specific routing that considers task quality, capability, reasoning,
   expected review and retry effort, and cost information when available.
 - A strict JSON plan contract and standard-library validator.
-- A preview-first installer with optional policy integration, atomic writes,
+- A preview-first installer with explicitly requested global policy integration, atomic writes,
   backups, receipts, and guarded undo.
 - A read-only doctor and an automated CLI lifecycle test.
 
@@ -26,8 +29,9 @@ perform production operations.
 
 - Python 3.11 or newer.
 - A Codex host that supports skills.
-- Native delegation and model overrides are optional; Sol keeps work local when
-  no suitable worker is available.
+- A host with suitable Sol and lower-GPT workers, advertised model choices, and
+  native delegation is required for implementation tasks. When any prerequisite
+  is missing, the workflow stops and explains the blocker.
 
 The runtime uses only the Python standard library.
 
@@ -57,11 +61,18 @@ The policy option preserves content outside its begin/end markers. Applied
 changes produce a receipt under
 `$CODEX_HOME/.gpt-development-orchestrator/receipts/`.
 
+The global policy is opt-in during installation. Once adopted, doctor reports
+missing or stale owned policy as a failure. The policy and skill are strong
+process guidance, not technical enforcement across every host or session; a
+host-level gate that verifies invocation identity and workflow state is needed
+for a technical guarantee.
+
 ## Verify And Undo
 
 ```powershell
 python install.py doctor
 python install.py doctor --json
+python install.py doctor --policy-file <policy-source>
 python install.py undo --receipt <receipt-path>
 python install.py undo --receipt <receipt-path> --apply
 ```
@@ -69,16 +80,21 @@ python install.py undo --receipt <receipt-path> --apply
 Undo also previews by default. It refuses to overwrite a skill or policy that
 changed after the receipt was created.
 
+Doctor compares the installed policy with the same source used by install:
+`<source-skill>/../../POLICY.md`. Pass `--policy-file` when installation used a
+custom policy source.
+
 ## Use
 
 Start a new Codex session after installation. Invoke the skill explicitly with:
 
 ```text
-$gpt-development-orchestrator plan and execute this substantial development task.
+$gpt-development-orchestrator plan and execute this development task.
 ```
 
-The skill may also be selected automatically for substantial work. Small,
-self-contained changes remain direct tasks.
+The skill governs every code or file implementation task. No implementation
+task bypasses the Sol-plan, worker, and independent-Sol-review workflow based
+on size.
 
 Validate a machine-readable plan without executing any command in it:
 

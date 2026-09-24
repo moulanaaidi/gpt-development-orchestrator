@@ -21,8 +21,11 @@ The active Sol-class model is the controlling role. Sol owns:
 - review of every delegated change;
 - integration, correction decisions, and final reporting.
 
-Workers do not redefine the plan or approve their own work. They implement a
-bounded task brief and return evidence.
+For every code or file implementation task, including small tasks, a lower GPT
+worker implements a bounded task brief and returns evidence. Workers do not
+redefine the plan or approve their own work. Read-only questions and reviews do
+not require a worker. A non-Sol root delegates plan authorship and final review
+to Sol and must not claim Sol identity.
 
 ## 3. Model Routing
 
@@ -41,10 +44,15 @@ checked for the actual billing mode. API prices must not be used as Codex
 subscription consumption estimates. Missing information stays unknown. Stronger
 reasoning is used when necessary for the quality floor, rather than by default.
 
+If a suitable Sol, lower GPT worker, native delegation mechanism, or adequate
+host identity evidence is unavailable, implementation fails closed. Never
+guess model IDs or use an external router. Host-provided invocation evidence is
+distinct from self-reported receipts; receipts alone do not prove identity.
+
 After review, Sol records whether the first attempt passed and the corrections
 required. This informs later comparable tasks without creating a permanent
 ranking from one outcome. One or two independent workers are normally enough;
-small, clear edits stay local.
+parallelism is optional, but worker implementation is mandatory for every task.
 
 ## 4. Runtime Workflow
 
@@ -58,10 +66,11 @@ small, clear edits stay local.
    floor with the lowest expected total effort, recording uncertainty.
 5. **Implement:** A worker changes only its declared write set and reports
    changed paths, commands, results, unresolved risks, and deviations.
-6. **Review:** Sol inspects the actual diff and evidence first for specification
-   compliance, then for quality, security, maintainability, and regressions.
-7. **Correct:** Sol either fixes small issues directly or sends one consolidated
-   correction brief to a worker. Additional cycles require a concrete reason.
+6. **Review:** Sol independently inspects every actual diff and evidence first
+   for specification compliance, then for quality, security, maintainability,
+   and regressions.
+7. **Correct:** Sol sends a consolidated correction brief to a worker for any
+   required implementation changes. Additional cycles require a concrete reason.
 8. **Integrate:** Sol runs repository-level validation and resolves interaction
    failures between otherwise valid task bundles.
 9. **Continue:** Sol updates a checkpoint when work will span sessions or
@@ -82,8 +91,8 @@ small, clear edits stay local.
 ### Codex Skill
 
 `skill/gpt-development-orchestrator/` contains the discoverable workflow,
-focused references, templates, and UI metadata. It tells Sol when and how to
-orchestrate work while preserving normal Codex behavior for small tasks.
+focused references, templates, and UI metadata. It requires orchestration for
+all implementation tasks, including small tasks.
 
 ### Plan Contract
 
@@ -104,8 +113,15 @@ or edits authentication state.
 ### Doctor
 
 The doctor checks Python, source package integrity, installed skill integrity,
-policy markers, configuration, and validator behavior. It reports actionable
-failures and does not mutate the environment.
+the exact installed global policy against its source, configuration, and
+validator behavior. Missing or stale owned policy fails strict-workflow
+diagnostics. It reports actionable failures and does not mutate the environment.
+
+The global instruction and skill are strong process guidance, not technical
+hard enforcement across all hosts or sessions. A host-level gate that verifies
+invocation identity and blocks implementation until the required Sol plan,
+worker invocation, and independent Sol review exist is required for a
+technical guarantee.
 
 ## 7. Safety Boundaries
 

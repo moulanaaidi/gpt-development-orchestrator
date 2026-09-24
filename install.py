@@ -39,6 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     doctor_parser = subcommands.add_parser("doctor", help="Read-only installation diagnostics")
     _add_common_arguments(doctor_parser)
+    doctor_parser.add_argument("--policy-file", type=Path, help="Policy source to compare against installed AGENTS.md")
     doctor_parser.add_argument("--json", action="store_true", help="Emit structured JSON")
     return parser
 
@@ -78,7 +79,11 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"- {action}")
             return 0
         if arguments.command == "doctor":
-            report = run_doctor(codex_home=arguments.codex_home, source_skill=arguments.source)
+            report = run_doctor(
+                codex_home=arguments.codex_home,
+                source_skill=arguments.source,
+                policy_source=arguments.policy_file,
+            )
             if arguments.json:
                 print(report.to_json())
             else:

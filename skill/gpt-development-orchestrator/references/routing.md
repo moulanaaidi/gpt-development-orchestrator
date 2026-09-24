@@ -8,20 +8,24 @@ quality, price, or reasoning support from a name or a previous session.
 
 Before the first delegation in a session, inspect the native delegation tool's
 available model overrides and descriptions. Use the exact advertised IDs and
-supported reasoning levels. Include the current controller as a candidate for
-keeping work local. Refresh this view if the host changes or a model call fails
-because an override is unavailable. A plan's `model_registry` is a snapshot of
-these choices for that plan, not a permanent catalogue.
+supported reasoning levels. Record Sol as plan and review owner; all
+implementation is assigned to an eligible worker. Refresh this view if the
+host changes or a model call fails because an override is unavailable. A
+plan's `model_registry` is a snapshot of these choices for that plan, not a
+permanent catalogue.
 
-If the host does not expose delegation or enough capability information, keep
-the task local or use an explicitly available model that meets the task's
-requirements. Never invent a model, query credentials, or use an external
-router to fill a gap.
+Every code or file implementation task requires host-native delegation to a
+suitable lower GPT worker. If the host does not expose native delegation,
+advertised GPT worker choices, or sufficient host invocation identity evidence,
+fail closed: do not implement and explain the missing prerequisite. Do not keep
+implementation local as a fallback. Read-only questions and read-only reviews
+need no implementation worker. Never invent a model, query credentials, or use
+an external router to fill a gap.
 
 ## Choose for outcome and total effort
 
-1. Describe the task's difficulty, blast radius, ambiguity, and acceptance
-   checks. Decide whether independent implementation and review add value.
+1. Assess the task's difficulty, blast radius, ambiguity, and acceptance
+   checks to determine the quality floor and suitable worker capability.
 2. Set a quality floor. Security boundaries, irreversible operations, complex
    architecture, and difficult debugging require stronger reasoning and closer
    review. A bounded fixture or documentation edit usually does not.
@@ -42,11 +46,14 @@ router to fill a gap.
    reason, and uncertainty in the task brief or plan. Reassess after evidence
    arrives rather than treating the first choice as permanently correct.
 
-Sol owns the plan and final acceptance. For exceptionally hard planning or
+Sol owns the actual plan and final acceptance. If the root agent is not Sol, it
+must delegate plan authorship and final review to Sol and must not claim Sol
+identity. For exceptionally hard planning or
 review, Sol can obtain a second opinion from the strongest suitable model the
 host exposes, then inspect and decide. Worker models do not approve their own
 changes. A main-session model selected in the Codex UI may not be changeable by
-this skill; in that case use available delegation for bounded assistance.
+this skill; use advertised native delegation for bounded implementation and
+fail closed if no suitable worker is available.
 
 ## Learn from actual work
 
@@ -59,4 +66,5 @@ permanent model ranking.
 
 Keep delegation bounded. One or two independent workers are usually enough;
 parallelism is useful only when write sets are disjoint and its coordination
-cost is lower than the time saved. Small, clear edits should remain local.
+cost is lower than the time saved. Every implementation task still requires a
+worker, even when it is too small to benefit from parallelism.

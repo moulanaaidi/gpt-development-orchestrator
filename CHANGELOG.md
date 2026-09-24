@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.2 - 2026-09-24
+
+- Require a Sol-authored plan, bounded implementation by a lower GPT worker,
+  and independent two-pass Sol review for every implementation task, including
+  small changes. Fail-closed handling of missing capability or identity
+  evidence is a workflow requirement, not technical enforcement without a
+  host-level invocation gate.
+- Clarify that the global AGENTS.md policy is opt-in and that the workflow is
+  strong process guidance, not technical enforcement; a host-level invocation
+  gate is needed for that guarantee.
+- Check for missing or stale installed policy in doctor and keep
+  `--policy-file` behavior consistent with the selected policy file.
+
 ## 0.1.1 - 2026-09-24
 
 - Route against models exposed in the current Codex session using a task quality

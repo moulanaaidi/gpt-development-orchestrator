@@ -14,9 +14,10 @@ class DoctorTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.root = Path(self.temporary.name)
         self.home = self.root / "home"
-        self.source = self.root / "source" / "gpt-development-orchestrator"
+        self.source = self.root / "skill" / "gpt-development-orchestrator"
         self.source.mkdir(parents=True)
         (self.source / "SKILL.md").write_text("# Skill\n", encoding="utf-8")
+        (self.root / "POLICY.md").write_text("Required generic enforcement policy.\n", encoding="utf-8")
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
@@ -26,15 +27,54 @@ class DoctorTests(unittest.TestCase):
 
     def test_reports_missing_install_actionably_without_writing(self) -> None:
         report = run_doctor(codex_home=self.home, source_skill=self.source)
-        self.assertTrue(report.healthy)
+        self.assertFalse(report.healthy)
         self.assertEqual(self._check(report, "installed-skill").status, "WARN")
+        self.assertEqual(self._check(report, "policy").status, "FAIL")
         self.assertFalse(self.home.exists())
 
     def test_reports_matching_install(self) -> None:
         install(codex_home=self.home, source_skill=self.source, apply=True)
         report = run_doctor(codex_home=self.home, source_skill=self.source)
-        self.assertTrue(report.healthy)
+        self.assertFalse(report.healthy)
         self.assertEqual(self._check(report, "installed-skill").status, "PASS")
+        self.assertEqual(self._check(report, "policy").status, "FAIL")
+
+    def test_reports_matching_global_policy(self) -> None:
+        install(codex_home=self.home, source_skill=self.source, with_policy=True, apply=True)
+        report = run_doctor(codex_home=self.home, source_skill=self.source)
+        self.assertTrue(report.healthy)
+        self.assertEqual(self._check(report, "policy").status, "PASS")
+
+    def test_reports_matching_custom_policy_source(self) -> None:
+        custom_policy = self.root / "custom-policy.md"
+        custom_policy.write_text("Custom enforcement policy.\n", encoding="utf-8")
+        install(
+            codex_home=self.home,
+            source_skill=self.source,
+            with_policy=True,
+            policy_source=custom_policy,
+            apply=True,
+        )
+        report = run_doctor(
+            codex_home=self.home,
+            source_skill=self.source,
+            policy_source=custom_policy,
+        )
+        self.assertEqual(self._check(report, "policy").status, "PASS")
+
+        default_source_report = run_doctor(codex_home=self.home, source_skill=self.source)
+        self.assertEqual(self._check(default_source_report, "policy").status, "FAIL")
+
+    def test_detects_stale_global_policy(self) -> None:
+        install(codex_home=self.home, source_skill=self.source, with_policy=True, apply=True)
+        agents = self.home / "AGENTS.md"
+        agents.write_text(
+            agents.read_text(encoding="utf-8").replace("Required generic", "Outdated generic"),
+            encoding="utf-8",
+        )
+        report = run_doctor(codex_home=self.home, source_skill=self.source)
+        self.assertFalse(report.healthy)
+        self.assertEqual(self._check(report, "policy").status, "FAIL")
 
     def test_detects_installed_integrity_difference(self) -> None:
         install(codex_home=self.home, source_skill=self.source, apply=True)

@@ -1,6 +1,6 @@
 interface:
   display_name: "GPT Development Orchestrator"
-  short_description: "Plan and review substantial Codex development work"
-  default_prompt: "Use $gpt-development-orchestrator to plan and coordinate this substantial development task."
+  short_description: "Require Sol-led planning, worker implementation, and review"
+  default_prompt: "Use $gpt-development-orchestrator to plan and coordinate this development task."
 policy:
   allow_implicit_invocation: true

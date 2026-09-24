@@ -75,20 +75,47 @@ def _check_installed(destination: Path, source_digest: str | None) -> DoctorChec
     return DoctorCheck("installed-skill", "PASS", "Installed skill matches source integrity digest")
 
 
-def _check_policy(path: Path) -> DoctorCheck:
+def _check_policy(path: Path, source: Path) -> DoctorCheck:
     try:
         ensure_plain_file_or_missing(path, "AGENTS.md")
+        ensure_plain_file_or_missing(source, "Policy source")
+        if not source.exists():
+            return DoctorCheck("policy", "FAIL", f"Policy source is missing: {source}")
+        expected = source.read_bytes().replace(b"\r\n", b"\n").rstrip(b"\n")
+        if POLICY_BEGIN.encode("ascii") in expected or POLICY_END.encode("ascii") in expected:
+            return DoctorCheck("policy", "FAIL", "Policy source contains reserved installer-owned markers")
+        expected_block = (
+            POLICY_BEGIN.encode("ascii") + b"\n" + expected + b"\n" + POLICY_END.encode("ascii") + b"\n"
+        )
         if not path.exists():
-            return DoctorCheck("policy", "PASS", "No global policy installed (optional)")
-        content = path.read_bytes()
+            return DoctorCheck(
+                "policy",
+                "FAIL",
+                "Global orchestration policy is missing. Run install.py --with-policy --apply.",
+            )
+        content = path.read_bytes().replace(b"\r\n", b"\n")
     except (FileSafetyError, OSError) as error:
         return DoctorCheck("policy", "FAIL", str(error))
     begin = content.count(POLICY_BEGIN.encode("ascii"))
     end = content.count(POLICY_END.encode("ascii"))
     if begin == 0 and end == 0:
-        return DoctorCheck("policy", "PASS", "No orchestrator policy block installed (optional)")
+        return DoctorCheck(
+            "policy",
+            "FAIL",
+            "Global orchestration policy block is missing. Run install.py --with-policy --apply.",
+        )
     if begin == 1 and end == 1 and content.find(POLICY_BEGIN.encode("ascii")) < content.find(POLICY_END.encode("ascii")):
-        return DoctorCheck("policy", "PASS", "One owned orchestrator policy block is present")
+        start = content.find(POLICY_BEGIN.encode("ascii"))
+        finish = content.find(POLICY_END.encode("ascii"))
+        line_end = content.find(b"\n", finish)
+        after = len(content) if line_end == -1 else line_end + 1
+        if content[start:after] != expected_block:
+            return DoctorCheck(
+                "policy",
+                "FAIL",
+                "Global orchestration policy is stale. Run install.py --with-policy --apply.",
+            )
+        return DoctorCheck("policy", "PASS", "Installed global orchestration policy matches the source")
     return DoctorCheck("policy", "FAIL", "AGENTS.md has incomplete or duplicate orchestrator policy markers")
 
 
@@ -115,18 +142,20 @@ def run_doctor(
     *,
     codex_home: str | Path | None = None,
     source_skill: str | Path | None = None,
+    policy_source: str | Path | None = None,
 ) -> DoctorReport:
     """Inspect only known package paths; this function never writes files."""
     home = resolve_codex_home(codex_home)
     source = Path(source_skill).expanduser().resolve() if source_skill else default_skill_source()
     source_check, source_digest = _check_source(source)
-    repository_root = source.parent.parent if source.parent.name == "skill" else Path(__file__).resolve().parent.parent
+    repository_root = source.parent.parent
+    policy = Path(policy_source).expanduser().resolve() if policy_source else repository_root / "POLICY.md"
     checks = [
         _check_python(),
         DoctorCheck("codex-home", "PASS", f"Using Codex home: {home}"),
         source_check,
         _check_installed(installed_skill_path(home), source_digest),
-        _check_policy(policy_path(home)),
+        _check_policy(policy_path(home), policy),
         _check_validator(repository_root),
     ]
     return DoctorReport(checks=checks)

@@ -1,6 +1,6 @@
 # Sol Review
 
-Sol reviews every delegated change directly. Inspect the actual diff and relevant surrounding code; do not accept a worker's summary as proof. Run suitable checks when the environment permits and distinguish tests actually run from proposed tests.
+Sol independently reviews every implementation change, including small or apparently trivial changes. Inspect the actual diff and relevant surrounding code; do not accept a worker's summary as proof. Read-only questions and read-only reviews do not require an implementation worker. Run suitable checks when the environment permits and distinguish tests actually run from proposed tests. A non-Sol root must delegate final review to Sol and must not claim Sol identity.
 
 ## Pass 1: Specification
 
@@ -16,9 +16,12 @@ Sol reviews every delegated change directly. Inspect the actual diff and relevan
 
 ## Outcome
 
-Accept only when both passes are satisfactory and required validation is complete. Otherwise, Sol may make a narrow correction or issue one consolidated correction brief with findings, paths, and acceptance checks. Re-review the resulting diff. If more correction cycles are needed, state why. Do not let workers approve their own work or silently waive unresolved risks.
+Accept only when both passes are satisfactory and required validation is complete. Otherwise, Sol issues one consolidated correction brief with findings, paths, and acceptance checks to the implementation worker. Route every implementation correction back to a worker; Sol does not directly edit implementation files. Re-review the resulting diff. If more correction cycles are needed, state why. Do not let workers approve their own work or silently waive unresolved risks.
 
 Report material gaps plainly. No automatic commit, push, merge, publish, deployment, credential mutation, or production operation is implied by review or acceptance.
+
+Review host-provided invocation identity evidence separately from self-reported
+worker receipts. A receipt alone cannot establish which model or agent ran.
 
 When routing was uncertain, record whether the worker met acceptance on the
 first attempt and the corrections needed. Use that evidence for comparable

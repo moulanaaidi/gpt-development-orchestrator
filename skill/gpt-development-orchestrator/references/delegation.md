@@ -1,6 +1,6 @@
 # Delegation
 
-Sol delegates implementation, not authority. Give each worker one outcome and a finite write set. Use the host's native delegation mechanism when present; otherwise make the assignment actionable for the available workflow without claiming a subagent was run.
+Sol delegates implementation, not authority. Every implementation task, including small tasks, must be assigned to a lower GPT worker using the host's native delegation mechanism. If native delegation or suitable advertised workers are unavailable, stop without implementing and explain the blocker. Give each worker one outcome and a finite write set. Never imply delegation occurred when it did not.
 
 ## Task brief
 
@@ -13,6 +13,12 @@ Each assignment should state:
 - required return format: status, changed paths, commands/results, deviations, unresolved risks, and follow-up needs.
 
 Use [../templates/task-brief.md](../templates/task-brief.md) when it helps. Do not include secrets or unnecessary sensitive data.
+
+Host-provided invocation evidence (for example, agent/model metadata supplied
+by the host) is distinct from a worker's self-reported receipt. Do not treat
+the latter as proof of the former. The active root agent must not claim Sol
+identity unless the host establishes that identity; a non-Sol root delegates
+plan authorship and final review to Sol.
 
 ## Ownership and parallel work
 

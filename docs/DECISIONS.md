@@ -26,6 +26,22 @@ integrate, or expand their own work.
 **Reason:** Separating implementation from acceptance reduces self-review bias
 and prevents task drift.
 
+## ADR-009: Mandatory Sol-Worker-Sol For Implementation
+
+**Decision:** Every code or file implementation task, including small changes,
+requires an actual Sol-authored plan, bounded implementation by a lower GPT
+worker selected from host-advertised choices and invoked through native
+delegation, and independent two-pass review by Sol. Read-only questions and
+reviews do not require a worker. A non-Sol root delegates plan authorship and
+final review to Sol without claiming Sol identity. Missing Sol, worker,
+delegation, or adequate host identity evidence fails closed. Self-reported
+receipts are not host invocation evidence.
+
+**Reason:** A size-based local bypass defeats consistent independent review and
+planning. Host-advertised native capabilities avoid guessed model IDs and
+external routing. The global policy and skill remain process guidance rather
+than technical enforcement; host-level gating is required for a guarantee.
+
 ## ADR-004: Skill And Deterministic Tools
 
 **Decision:** Package orchestration guidance as a Codex skill and use small

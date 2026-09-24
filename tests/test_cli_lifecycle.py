@@ -66,6 +66,31 @@ class CliLifecycleTests(unittest.TestCase):
             self.assertFalse(skill.exists())
             self.assertFalse((home / "AGENTS.md").exists())
 
+    def test_doctor_accepts_custom_policy_source(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            home = root / "codex-home"
+            policy = root / "custom-policy.md"
+            policy.write_text("Custom policy source.\n", encoding="utf-8")
+
+            self.run_cli(
+                "install",
+                "--codex-home",
+                str(home),
+                "--with-policy",
+                "--policy-file",
+                str(policy),
+                "--apply",
+            )
+            doctor = self.run_cli(
+                "doctor",
+                "--codex-home",
+                str(home),
+                "--policy-file",
+                str(policy),
+            )
+            self.assertIn("PASS policy", doctor.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
