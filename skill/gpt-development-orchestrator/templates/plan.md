@@ -8,9 +8,10 @@
 - Out of scope:
 
 ## Context and constraints
-- Repository instructions / relevant documents:
+- Repository instructions / authoritative links (summarize only task-specific context):
 - Interfaces, invariants, or design decisions:
 - Assumptions and unresolved decisions:
+- For visual work: representative screen, visual acceptance, and Sol direction gate:
 
 ## Tasks
 | ID | Depends on | Exact available model / selection reason | Write set | Acceptance and validation | Status |
@@ -21,11 +22,13 @@
 - Shared contracts to settle before parallel work:
 - Sol specification review:
 - Sol engineering review:
+- Visual acceptance evidence (if applicable), separate from structural validation:
 - Combined validation:
 
 ## Risks and authorization boundaries
 - Material risks / mitigations:
 - External, credential, source-control, or production actions requiring separate authorization:
+- Correction budget: one initial attempt plus at most two correction cycles; same-outcome replanning does not reset it.
 
 ## Completion
 - [ ] Acceptance criteria met

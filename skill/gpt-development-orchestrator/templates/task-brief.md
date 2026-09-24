@@ -8,7 +8,7 @@
 <One bounded implementation outcome>
 
 ## Context
-<Relevant repository facts, instructions, interfaces, and decisions>
+<Only task-specific facts; link to authoritative repository instructions, interfaces, and decisions instead of repeating them>
 
 ## Routing
 - Exact host-available model and reasoning level:
@@ -29,10 +29,12 @@ Do not modify paths outside this list. Do not commit, push, merge, deploy, chang
 ## Acceptance
 - [ ] <Observable result>
 - [ ] <Focused test/check and command>
+- [ ] For visual work, Sol approves one representative production-quality screen's direction before scaling; visual acceptance is distinct from structural validation.
+- [ ] One initial attempt and at most two correction cycles; replanning the same outcome does not reset this limit.
 
 ## Sol review (completed after worker returns)
 - [ ] Sol independently reviewed the actual diff in specification and engineering-quality passes.
 - [ ] Host invocation evidence is distinguished from worker-reported receipts.
 
 ## Return to Sol
-Report status; changed paths; exact commands run and results; acceptance evidence; deviations; unresolved risks or test gaps; and any required follow-up. Do not claim checks that were not run.
+Report status; changed paths; exact commands run and results; whether the initial attempt met acceptance; correction count; host-reported usage (or `unknown`); acceptance evidence; deviations; unresolved risks or test gaps; and required follow-up. Do not claim checks or usage that were not reported.

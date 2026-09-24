@@ -12,7 +12,11 @@ Each assignment should state:
 - acceptance criteria and focused validation commands;
 - required return format: status, changed paths, commands/results, deviations, unresolved risks, and follow-up needs.
 
-Use [../templates/task-brief.md](../templates/task-brief.md) when it helps. Do not include secrets or unnecessary sensitive data.
+Keep the brief compact. Link to authoritative repository instructions,
+architecture, design, or policy documents instead of copying their contents;
+include only task-specific context needed to implement safely. Use
+[../templates/task-brief.md](../templates/task-brief.md) when it helps. Do not
+include secrets or unnecessary sensitive data.
 
 Host-provided invocation evidence (for example, agent/model metadata supplied
 by the host) is distinct from a worker's self-reported receipt. Do not treat
@@ -30,3 +34,11 @@ plan authorship and final review to Sol.
 ## Evidence return
 
 Ask for concise, verifiable evidence: changed paths, tests or checks actually run and their results, known gaps, and deviations from the brief. A claimed test pass is not a substitute for Sol's inspection or combined validation.
+
+Each implementation gets one initial worker attempt and at most two correction
+cycles. Sol sends one consolidated correction brief per cycle. If acceptance is
+still unmet after the second correction, stop editing and report findings for
+Sol's decision. Renaming or splitting the same acceptance outcome into a new
+plan cannot restart the correction budget. Resume implementation only under a
+materially new, explicitly authorized objective; preserve the earlier attempt
+and correction history in the report.

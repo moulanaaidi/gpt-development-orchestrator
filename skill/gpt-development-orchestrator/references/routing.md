@@ -6,21 +6,20 @@ quality, price, or reasoning support from a name or a previous session.
 
 ## Discover the current choices
 
-Before the first delegation in a session, inspect the native delegation tool's
-available model overrides and descriptions. Use the exact advertised IDs and
-supported reasoning levels. Record Sol as plan and review owner; all
-implementation is assigned to an eligible worker. Refresh this view if the
-host changes or a model call fails because an override is unavailable. A
-plan's `model_registry` is a snapshot of these choices for that plan, not a
-permanent catalogue.
+Before implementation begins in a session, inspect whether the host exposes
+native delegation, suitable advertised lower-GPT choices, and adequate
+invocation-identity evidence. This is a session compatibility check: make it
+once, then verify identity evidence on every Sol and worker invocation. Use
+exact advertised IDs and supported reasoning levels. Refresh compatibility
+only if the host changes or an invocation fails (including an unavailable
+override). If required evidence is absent, stop promptly; do not retry the
+same missing check. A plan's `model_registry` is a snapshot, not a permanent
+catalogue.
 
 Every code or file implementation task requires host-native delegation to a
-suitable lower GPT worker. If the host does not expose native delegation,
-advertised GPT worker choices, or sufficient host invocation identity evidence,
-fail closed: do not implement and explain the missing prerequisite. Do not keep
-implementation local as a fallback. Read-only questions and read-only reviews
-need no implementation worker. Never invent a model, query credentials, or use
-an external router to fill a gap.
+suitable lower GPT worker. Do not keep implementation local as a fallback.
+Read-only questions and read-only reviews need no implementation worker. Never
+invent a model, query credentials, or use an external router to fill a gap.
 
 ## Choose for outcome and total effort
 

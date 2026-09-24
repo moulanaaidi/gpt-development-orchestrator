@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.3 - 2026-09-24
+
+- Check host delegation and identity compatibility once per session, verify
+  each invocation, and fail fast on missing evidence; retry compatibility
+  checks only after a host change or invocation failure.
+- Limit each implementation to an initial attempt and two correction cycles;
+  replanning the same outcome does not reset the limit.
+- Add a representative-screen direction gate for visual product work, separate
+  visual acceptance from structural validation, and keep worker briefs concise.
+- Record first-pass outcomes, corrections, and host-reported usage only;
+  unreported usage remains unknown.
+
 ## 0.1.2 - 2026-09-24
 
 - Require a Sol-authored plan, bounded implementation by a lower GPT worker,

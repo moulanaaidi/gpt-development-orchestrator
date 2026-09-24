@@ -5,9 +5,19 @@ A reusable, GPT-only development workflow for Codex projects.
 Sol owns the actual plan, architecture, design, routing, integration, and
 independent final review. Every code or file implementation task, including
 small changes, is implemented by a bounded lower-GPT worker selected from
-current host-advertised choices and invoked through native delegation. Missing
-Sol, worker, delegation, or identity evidence means fail closed, not a local
+current host-advertised choices and invoked through native delegation. Check
+host capability compatibility once per session, verify identity for each
+invocation, and refresh compatibility only after a host change or invocation
+failure. Missing evidence means fail fast, not repeated retries or a local
 implementation fallback. Read-only questions and reviews need no worker.
+
+An implementation has one initial attempt and at most two correction cycles;
+replanning the same outcome does not reset the limit. For visual product work,
+Sol approves the direction of one representative production-quality screen
+before that direction is scaled. User approval is needed only when the target
+repository requires it. Visual acceptance is assessed separately from
+structural validation. Worker briefs stay compact and link to authoritative
+repository documents instead of repeating their contents.
 
 It is product-neutral. Approval rules and business governance remain in each
 target repository.
@@ -125,3 +135,7 @@ idempotent reapply, and undo.
 - `docs/DECISIONS.md`: architecture decisions and rationale.
 - `docs/THREAT-MODEL.md`: assets, threats, controls, and residual risks.
 - `CHECKPOINT.md`: current verified state and next action.
+
+After review, record first-pass success, correction cycles, and usage only
+when reported by the host; otherwise mark usage unknown. These workflow rules
+are guidance, not host enforcement.

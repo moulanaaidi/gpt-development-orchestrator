@@ -9,6 +9,14 @@ Sol owns the plan. First understand the repository's instructions, architecture,
 - Mark blocked tasks explicitly and do not delegate them until their dependency is resolved.
 - State assumptions where evidence is missing. Ask the user only when a material decision cannot be safely inferred.
 - Preserve target-repository conventions and policies. This skill does not replace them.
+- For visual product work, identify one representative production-quality screen,
+  its visual acceptance criteria, and the Sol direction-approval gate before
+  scaling. Require user approval only when target-repository policy says so.
+- Separate visual acceptance from structural validation. Record observable
+  visual qualities and interaction checks alongside, not instead of, behavior,
+  accessibility, and automated validation.
+- Keep plans concise: link to authoritative repository instructions and design
+  sources rather than copying their contents.
 
 Use [../templates/plan.md](../templates/plan.md) as an optional starting point. If the repository has a machine-readable plan contract, use and validate that contract instead of treating the markdown template as authoritative.
 

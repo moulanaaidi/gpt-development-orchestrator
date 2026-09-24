@@ -23,10 +23,10 @@
 - Not run / known gaps:
 
 ## Routing feedback
-- Model and task type:
-- First attempt met acceptance (yes/no/unknown):
-- Corrections and extra review needed:
-- Usage or cost observed (or unknown):
+- Host-advertised model and task type (omit if unavailable):
+- Initial attempt met acceptance (yes/no/unknown):
+- Correction cycles used (0-2) and extra review needed:
+- Usage reported by host (or `unknown`):
 
 ## Next action
 <One concrete action>

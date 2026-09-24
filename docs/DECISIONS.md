@@ -85,3 +85,34 @@ quality data is recorded as unknown.
 does not guarantee lower total usage when review and retries are counted. Host
 descriptions and observed outcomes can inform a choice, but this workflow
 cannot prove a globally optimal model without reliable measurements.
+
+## ADR-010: Bounded Correction And Session Compatibility
+
+**Decision:** Check delegation and identity compatibility once per session,
+verify identity per invocation, and repeat compatibility checks only when the
+host changes or an invocation fails. Stop on missing evidence. Limit an
+implementation to one initial attempt and two correction cycles; replanning
+the same intended outcome does not reset the limit.
+
+**Reason:** Repeatedly probing an unchanged host or reopening the same plan
+creates unbounded work without improving evidence or accountability.
+
+## ADR-011: Visual Direction Before Scale
+
+**Decision:** Visual product work starts with one representative,
+production-quality screen. Sol confirms the direction before it is applied
+more broadly. User approval is required only where the target repository says
+it is. Visual acceptance is distinct from structural validation.
+
+**Reason:** Early direction review bounds visual rework while preserving the
+target repository's own approval rules and the separate need for behavioral,
+accessibility, and test validation.
+
+## ADR-012: Compact Briefs And Honest Outcome Evidence
+
+**Decision:** Worker briefs summarize only task-specific context and link to
+authoritative documents. Record first-pass success, correction count, and
+host-provided usage; usage not reported by the host is unknown.
+
+**Reason:** Linked context reduces prompt duplication, while explicit evidence
+limits prevent self-reported or inferred usage from being mistaken for facts.

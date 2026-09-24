@@ -49,6 +49,11 @@ host identity evidence is unavailable, implementation fails closed. Never
 guess model IDs or use an external router. Host-provided invocation evidence is
 distinct from self-reported receipts; receipts alone do not prove identity.
 
+Check delegation and identity compatibility once before implementation in a
+session. Verify identity for each Sol and worker invocation; repeat the
+compatibility check only after a host change or invocation failure. Missing
+evidence is a stop condition, not a reason for repeated retries.
+
 After review, Sol records whether the first attempt passed and the corrections
 required. This informs later comparable tasks without creating a permanent
 ranking from one outcome. One or two independent workers are normally enough;
@@ -69,12 +74,26 @@ parallelism is optional, but worker implementation is mandatory for every task.
 6. **Review:** Sol independently inspects every actual diff and evidence first
    for specification compliance, then for quality, security, maintainability,
    and regressions.
-7. **Correct:** Sol sends a consolidated correction brief to a worker for any
-   required implementation changes. Additional cycles require a concrete reason.
+7. **Correct:** Sol may send at most two consolidated correction briefs to a
+   worker after the initial attempt. If the outcome remains unresolved, stop
+   and report findings; replanning the same outcome does not reset the limit.
 8. **Integrate:** Sol runs repository-level validation and resolves interaction
    failures between otherwise valid task bundles.
 9. **Continue:** Sol updates a checkpoint when work will span sessions or
    contexts, then reports the verified outcome.
+
+For visual product work, build one representative production-quality screen
+before scaling the visual direction. Sol confirms that direction first; ask
+the user only when the target repository requires user approval. Evaluate
+visual acceptance independently from structural validation: appearance,
+hierarchy, and interaction are not established by tests alone, while visual
+approval does not replace behavior, accessibility, or test checks.
+
+Keep worker briefs compact: state the bounded goal, exact write set, constraints,
+acceptance, and return evidence, then link to authoritative repository
+documents instead of copying them into the prompt. Record whether the initial
+worker attempt met acceptance, the number of correction cycles, and usage only
+when the host reports it; otherwise usage is unknown.
 
 ## 5. Concurrency And Write Ownership
 

@@ -91,3 +91,34 @@ workflow below.
 - [x] Commit, tag, publish, or deploy only after explicit user authorization;
   the user explicitly authorized publication of these changes via the release
   commit.
+
+## Version 0.1.3 Checklist Addendum
+
+This addendum records the 0.1.3 workflow guidance without rewriting the
+historical 0.1 and 0.1.2 checklist entries above.
+
+### Workflow Guidance
+
+- [x] Check host delegation and identity compatibility once per session;
+  verify identity on every invocation and recheck compatibility only after a
+  host change or invocation failure. Missing evidence stops work promptly.
+- [x] Limit implementation to one initial attempt plus at most two correction
+  cycles; replanning the same intended outcome does not reset the limit.
+- [x] For visual product work, get Sol's direction approval on one
+  representative production-quality screen before scaling; seek user approval
+  only when repository policy requires it.
+- [x] Record visual acceptance separately from structural validation, and keep
+  worker briefs compact with links to authoritative context.
+- [x] Record first-pass success, corrections, and host-provided usage only;
+  mark unreported usage unknown.
+- [x] Keep these policies described as guidance; they are not host enforcement.
+
+### 0.1.3 Release Gate
+
+- [x] `python -m unittest discover -s tests -v` passes (60 tests; 7 skips for
+  Windows-unavailable link and POSIX capabilities).
+- [x] `python tools/validate_plan.py examples/valid-plan.json` passes.
+- [x] `git diff --check` passes.
+- [ ] Sol completes independent specification and engineering-quality reviews;
+  pending until Sol's review is recorded.
+- [ ] Release acceptance is recorded only after all preceding gates pass.
