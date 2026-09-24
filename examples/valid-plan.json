@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "plan": {
+    "id": "sample-api-foundation",
+    "title": "Sample API foundation",
+    "objective": "Add a small health endpoint with focused tests.",
+    "status": "ready"
+  },
+  "model_registry": {
+    "sol": ["gpt-6-sol"],
+    "luna": ["gpt-6-luna"],
+    "terra": ["gpt-5.6-terra"]
+  },
+  "tasks": [
+    {
+      "id": "API-01",
+      "title": "Implement health endpoint",
+      "readiness": "ready",
+      "role": "luna",
+      "model": "gpt-6-luna",
+      "dependencies": [],
+      "write_set": ["src/api/health.py", "tests/test_health.py"],
+      "mutates": true,
+      "acceptance_criteria": [
+        "The endpoint returns the documented healthy response.",
+        "The endpoint has a focused automated test."
+      ],
+      "validation_commands": ["python -m unittest tests.test_health"],
+      "risk": "low",
+      "parallel_group": "api-foundation"
+    },
+    {
+      "id": "DOC-01",
+      "title": "Document the endpoint",
+      "readiness": "ready",
+      "role": "luna",
+      "model": "gpt-6-luna",
+      "dependencies": ["API-01"],
+      "write_set": ["docs/api-health.md"],
+      "mutates": true,
+      "acceptance_criteria": ["The endpoint contract and example response are documented."],
+      "validation_commands": ["python tools/check_docs.py"],
+      "risk": "low"
+    }
+  ]
+}

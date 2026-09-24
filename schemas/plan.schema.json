@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gpt-development-orchestrator.local/schemas/plan.schema.json",
+  "title": "GPT Development Orchestrator Plan",
+  "description": "Portable task plan contract. The companion validator additionally checks cross-field role/model membership, unique task IDs, dependency existence and cycles, and parallel write-set overlap.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "plan", "model_registry", "tasks"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "plan": {
+      "$ref": "#/$defs/planMetadata"
+    },
+    "model_registry": {
+      "type": "object",
+      "description": "Declared role-to-model allowlist for this plan.",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+      },
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/task"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "planMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "objective", "status"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "title": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "objective": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "status": {
+      "type": "string",
+      "enum": ["draft", "ready", "in_progress", "blocked", "complete"]
+        }
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "readiness",
+        "role",
+        "model",
+        "dependencies",
+        "write_set",
+        "mutates",
+        "acceptance_criteria",
+        "validation_commands",
+        "risk"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "title": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "readiness": {
+          "type": "string",
+          "enum": ["draft", "ready", "in_progress", "blocked", "complete"]
+        },
+        "role": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "model": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "dependencies": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "write_set": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "description": "Repository-relative file or directory scopes. Use a terminal '/**' to own a directory and all descendants. Other wildcard syntax, absolute paths, and parent traversal are invalid."
+        },
+        "mutates": {
+          "type": "boolean"
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "validation_commands": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "description": "Commands are evidence only; the validator does not execute them. Mutating tasks must declare at least one."
+        },
+        "risk": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "parallel_group": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "pattern": "\\S" },
+            { "type": "null" }
+          ],
+          "description": "Tasks in the same non-null group may run concurrently and must have disjoint write scopes. Omit or use null for sequential/un-grouped work."
+        }
+      }
+    }
+  }
+}
