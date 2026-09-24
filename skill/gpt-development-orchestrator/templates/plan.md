@@ -13,9 +13,9 @@
 - Assumptions and unresolved decisions:
 
 ## Tasks
-| ID | Depends on | Owner/model available on this host | Write set | Acceptance and validation | Status |
+| ID | Depends on | Exact available model / selection reason | Write set | Acceptance and validation | Status |
 | --- | --- | --- | --- | --- | --- |
-| T1 | - | Sol / worker role and exact available model | `path/**` | Observable checks and commands | ready |
+| T1 | - | Current host model; quality floor and cost/quality uncertainty | `path/**` | Observable checks and commands | ready |
 
 ## Integration and review
 - Shared contracts to settle before parallel work:

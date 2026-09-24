@@ -19,3 +19,7 @@ Sol reviews every delegated change directly. Inspect the actual diff and relevan
 Accept only when both passes are satisfactory and required validation is complete. Otherwise, Sol may make a narrow correction or issue one consolidated correction brief with findings, paths, and acceptance checks. Re-review the resulting diff. If more correction cycles are needed, state why. Do not let workers approve their own work or silently waive unresolved risks.
 
 Report material gaps plainly. No automatic commit, push, merge, publish, deployment, credential mutation, or production operation is implied by review or acceptance.
+
+When routing was uncertain, record whether the worker met acceptance on the
+first attempt and the corrections needed. Use that evidence for comparable
+future tasks, while treating unreported usage as unknown.

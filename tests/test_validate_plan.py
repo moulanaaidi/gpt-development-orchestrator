@@ -24,17 +24,16 @@ def valid_plan() -> dict:
             "status": "ready",
         },
         "model_registry": {
-            "sol": ["gpt-6-sol"],
-            "luna": ["gpt-6-luna"],
-            "terra": ["gpt-5.6-terra"],
+            "controller": ["sample-controller"],
+            "worker": ["sample-worker", "sample-specialist"],
         },
         "tasks": [
             {
                 "id": "TASK-1",
                 "title": "First task",
                 "readiness": "ready",
-                "role": "luna",
-                "model": "gpt-6-luna",
+                "role": "worker",
+                "model": "sample-worker",
                 "dependencies": [],
                 "write_set": ["src/one.py"],
                 "mutates": True,
@@ -47,8 +46,8 @@ def valid_plan() -> dict:
                 "id": "TASK-2",
                 "title": "Second task",
                 "readiness": "ready",
-                "role": "terra",
-                "model": "gpt-5.6-terra",
+                "role": "worker",
+                "model": "sample-specialist",
                 "dependencies": ["TASK-1"],
                 "write_set": ["docs/two.md"],
                 "mutates": True,
@@ -96,13 +95,37 @@ class ValidatePlanTests(unittest.TestCase):
 
     def test_rejects_undeclared_role(self) -> None:
         plan = valid_plan()
-        plan["tasks"][0]["role"] = "worker"
-        self.assert_invalid(plan, "undeclared role 'worker'")
+        plan["tasks"][0]["role"] = "missing-role"
+        self.assert_invalid(plan, "undeclared role 'missing-role'")
 
     def test_rejects_model_not_allowed_for_declared_role(self) -> None:
         plan = valid_plan()
-        plan["tasks"][0]["model"] = "gpt-5.6-terra"
-        self.assert_invalid(plan, "is not declared for role 'luna'")
+        plan["tasks"][0]["model"] = "sample-controller"
+        self.assert_invalid(plan, "is not declared for role 'worker'")
+
+    def test_accepts_new_model_identifiers_from_session_registry(self) -> None:
+        plan = valid_plan()
+        plan["model_registry"]["worker"] = ["future-model-v42"]
+        plan["tasks"][0]["model"] = "future-model-v42"
+        plan["tasks"][1]["model"] = "future-model-v42"
+        self.assertEqual([], validate_plan.validate_plan(plan))
+
+    def test_accepts_routing_evidence_with_unknown_cost(self) -> None:
+        plan = valid_plan()
+        plan["tasks"][0]["routing"] = {
+            "quality_floor": "Focused implementation with passing tests",
+            "selection_reason": "Host describes this worker as suitable for bounded tasks",
+            "cost_evidence": "unknown",
+            "uncertainty": "No price information exposed by the host",
+        }
+        self.assertEqual([], validate_plan.validate_plan(plan))
+
+    def test_rejects_incomplete_or_fabricated_routing_evidence(self) -> None:
+        plan = valid_plan()
+        plan["tasks"][0]["routing"] = {"quality_floor": " ", "cost_evidence": "free"}
+        self.assert_invalid(plan, "$.tasks[0].routing.selection_reason: required field is missing")
+        self.assert_invalid(plan, "$.tasks[0].routing.quality_floor: expected a non-empty string")
+        self.assert_invalid(plan, "$.tasks[0].routing.cost_evidence: expected one of")
 
     def test_rejects_undeclared_dependency(self) -> None:
         plan = valid_plan()

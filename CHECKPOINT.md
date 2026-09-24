@@ -2,15 +2,15 @@
 
 ## Objective And Status
 
-Version 0.1 of the generic GPT Development Orchestrator is implemented and
-verified locally. It is ready for installation review but has not been applied
-to the real Codex home.
+Version 0.1 was installed into the real Codex home and pushed to a private
+GitHub repository. Version 0.1.1 makes model routing session-specific.
 
 ## Decisions
 
 - Sol owns architecture, planning, routing, integration, and final review.
 - Workers receive bounded tasks with disjoint write sets and return evidence.
-- Routing uses only GPT models and delegation capabilities exposed by the host.
+- Routing evaluates only GPT models and delegation capabilities exposed by the
+  current host. Names and versions do not encode permanent quality rankings.
 - The package is product-neutral and contains no executive approval workflow.
 - Version 0.1 uses a Codex skill and standard-library tools, not a daemon,
   external model router, or unverified custom-agent format.
@@ -26,6 +26,11 @@ to the real Codex home.
 - CLI preview/apply/doctor/reapply/undo lifecycle in a temporary home: passed.
 - Full suite: 48 tests passed with 7 platform-specific skips on Windows.
 - `git diff --check`: passed.
+- Routing update: 51 tests passed with 7 platform-specific skips; the official
+  skill validator passed. The sample plan validates.
+- Version 0.1.1 skill was installed in the real Codex home. Doctor reported
+  healthy with matching source and installed digests. The previous policy
+  block remained intact.
 
 ## Environment
 
@@ -35,11 +40,13 @@ to the real Codex home.
 
 ## Remaining Boundary
 
-- The real `$CODEX_HOME` has not been modified.
-- No commit, remote repository, tag, package publication, or deployment has
-  been created.
+- The real `$CODEX_HOME` contains the version 0.1.1 skill and its owned policy
+  block. The v0.1.1 undo receipt is
+  `install-cce36ad43abe4848b42ce5bf12e1e4f6.json`.
+- The private GitHub repository exists at
+  `https://github.com/moulanaaidi/gpt-development-orchestrator`.
 
 ## Next Action
 
-Preview installation against the real Codex home. After the user reviews that
-preview, apply the skill with or without the optional global policy block.
+Sync the reviewed change to the private GitHub repository, then use the
+orchestrator for the next substantial project task.

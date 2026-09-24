@@ -5,7 +5,7 @@ Sol owns the plan. First understand the repository's instructions, architecture,
 ## Plan only what the task needs
 
 - For a contained task, use a short checklist and clear acceptance criteria; do not manufacture phases or paperwork.
-- For substantial work, define the intended outcome, in-scope and out-of-scope behavior, interfaces or invariants, dependencies, task owners/models, disjoint write sets, acceptance criteria, validation commands, and material risks.
+- For substantial work, define the intended outcome, in-scope and out-of-scope behavior, interfaces or invariants, dependencies, task owners/models, disjoint write sets, acceptance criteria, validation commands, and material risks. Record why the chosen model is likely to meet the quality floor at reasonable total effort.
 - Mark blocked tasks explicitly and do not delegate them until their dependency is resolved.
 - State assumptions where evidence is missing. Ask the user only when a material decision cannot be safely inferred.
 - Preserve target-repository conventions and policies. This skill does not replace them.

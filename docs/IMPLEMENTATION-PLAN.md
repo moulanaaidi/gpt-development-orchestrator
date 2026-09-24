@@ -1,5 +1,9 @@
 # Implementation Plan
 
+This is the historical version 0.1 implementation record. Model names below
+describe that bootstrap session, not permanent routing rules. Current routing
+is defined in `skill/gpt-development-orchestrator/references/routing.md`.
+
 ## Release Objective
 
 Deliver version 0.1 as an installable, testable, and reversible Codex skill that

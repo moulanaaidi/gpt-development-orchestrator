@@ -26,17 +26,25 @@ bounded task brief and return evidence.
 
 ## 3. Model Routing
 
-| Model | Default assignment |
-| --- | --- |
-| Terra-class worker | High-complexity or high-risk implementation, cross-module behavior, security, authentication, payments, migrations, concurrency, native lifecycle, or difficult debugging |
-| Luna-class worker | Normal bounded implementation, UI components and flows, API wiring, focused refactors, accessibility, and ordinary tests |
-| Approved lower-cost GPT worker | Low-risk mechanical work, fixtures, repetitive tests, narrow transformations, documentation normalization, and deterministic scaffolding |
-| Sol-class controller | Planning, architecture, design, ambiguous or critical decisions, integration, and final review; trivial edits may remain local |
+Sol is a responsibility in this workflow: planning, design, integration, and
+final acceptance. Worker names do not encode a permanent intelligence or price
+ranking. For each session, Sol reads the host's exact available model overrides,
+descriptions, and supported reasoning levels. A plan records the selected IDs
+as a session snapshot; the package itself has no versioned routing table.
 
-Routing is risk-based, not a reward hierarchy. Sol resolves role aliases against
-the models actually exposed by the host and can raise a task whenever
-uncertainty, blast radius, or review cost warrants it. An unavailable model is
-never guessed or invoked through an unapproved external service.
+For each bounded task, Sol sets a quality floor from risk, difficulty, and
+acceptance checks. It then chooses among eligible models using host capability
+descriptions, any disclosed usage or cost class, and observed results on similar
+tasks. The estimate includes execution, review, retries, and integration. If
+cost matters and the host has no figures, current official pricing can be
+checked for the actual billing mode. API prices must not be used as Codex
+subscription consumption estimates. Missing information stays unknown. Stronger
+reasoning is used when necessary for the quality floor, rather than by default.
+
+After review, Sol records whether the first attempt passed and the corrections
+required. This informs later comparable tasks without creating a permanent
+ranking from one outcome. One or two independent workers are normally enough;
+small, clear edits stay local.
 
 ## 4. Runtime Workflow
 
@@ -46,7 +54,8 @@ never guessed or invoked through an unapproved external service.
    acceptance criteria, validation commands, and risks.
 3. **Validate:** The deterministic plan validator rejects missing or
    contradictory execution fields before delegation.
-4. **Route:** Sol assigns each ready task to the least costly suitable model.
+4. **Route:** Sol selects an available model likely to clear the task's quality
+   floor with the lowest expected total effort, recording uncertainty.
 5. **Implement:** A worker changes only its declared write set and reports
    changed paths, commands, results, unresolved risks, and deviations.
 6. **Review:** Sol inspects the actual diff and evidence first for specification
@@ -79,8 +88,9 @@ orchestrate work while preserving normal Codex behavior for small tasks.
 ### Plan Contract
 
 `schemas/plan.schema.json` defines the machine-readable task plan. The schema
-captures task identity, readiness, dependencies, model assignment, write set,
-acceptance criteria, validation, and risk. `tools/validate_plan.py` performs
+captures task identity, readiness, dependencies, session model assignment,
+optional routing evidence, write set, acceptance criteria, validation, and risk.
+`tools/validate_plan.py` performs
 schema-independent standard-library validation so installation has no runtime
 package dependency.
 

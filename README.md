@@ -2,10 +2,9 @@
 
 A reusable, GPT-only development workflow for Codex projects.
 
-The orchestrator keeps the active Sol-class model responsible for architecture,
-planning, design, routing, integration, and final review. It delegates bounded
-implementation tasks to available Terra-, Luna-, or lower-cost GPT workers
-according to risk and complexity.
+The Sol controller owns architecture, planning, design, routing, integration,
+and final review. It delegates bounded implementation tasks to GPT models
+exposed by the current Codex session. Model versions are selected per task.
 
 It is product-neutral. Approval rules and business governance remain in each
 target repository.
@@ -13,8 +12,8 @@ target repository.
 ## What It Provides
 
 - A Codex skill with Sol-led planning, delegation, review, and continuity.
-- Capability-aware routing to available Terra-, Luna-, or lower-cost GPT
-  workers.
+- Session-specific routing that considers task quality, capability, reasoning,
+  expected review and retry effort, and cost information when available.
 - A strict JSON plan contract and standard-library validator.
 - A preview-first installer with optional policy integration, atomic writes,
   backups, receipts, and guarded undo.
@@ -86,6 +85,12 @@ Validate a machine-readable plan without executing any command in it:
 ```powershell
 python tools/validate_plan.py examples/valid-plan.json
 ```
+
+The example uses illustrative model IDs. Replace its `model_registry` and task
+model IDs with models exposed by your current Codex host before delegation.
+The validator checks internal consistency; it cannot query live availability,
+prices, or measure answer quality. The skill makes the routing choice from host
+descriptions and task evidence, then Sol reviews the result.
 
 ## Test
 

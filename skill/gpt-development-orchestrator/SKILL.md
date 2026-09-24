@@ -15,7 +15,7 @@ Sol is the controller: it orients in the target repository, owns design and arch
 
 1. Read applicable repository instructions and inspect the relevant code and worktree.
 2. Sol creates an actionable plan with dependencies, write sets, acceptance criteria, validation, and risks. Read [references/planning.md](references/planning.md).
-3. Route only ready tasks using the models and delegation capabilities actually exposed by the host. Read [references/routing.md](references/routing.md) and [references/delegation.md](references/delegation.md) when delegating.
+3. Route only ready tasks using the current host's model choices, task quality floor, and expected total effort. Read [references/routing.md](references/routing.md) and [references/delegation.md](references/delegation.md) when delegating.
 4. Review every worker's actual diff and evidence in two passes: specification compliance, then engineering quality. Read [references/review.md](references/review.md).
 5. Integrate, run relevant combined validation, and report verified results. For work spanning sessions, maintain a checkpoint using [references/continuity.md](references/continuity.md).
 

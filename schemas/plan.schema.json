@@ -133,6 +133,19 @@
           "type": "string",
           "enum": ["low", "medium", "high", "critical"]
         },
+        "routing": {
+          "type": "object",
+          "description": "Optional evidence for a session-specific model choice. Prices and quality must not be invented.",
+          "additionalProperties": false,
+          "required": ["quality_floor", "selection_reason", "cost_evidence"],
+          "properties": {
+            "quality_floor": { "$ref": "#/$defs/nonEmptyString" },
+            "selection_reason": { "$ref": "#/$defs/nonEmptyString" },
+            "cost_evidence": { "type": "string", "enum": ["host_reported", "qualitative", "unknown"] },
+            "reasoning_effort": { "$ref": "#/$defs/nonEmptyString" },
+            "uncertainty": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
         "parallel_group": {
           "oneOf": [
             { "type": "string", "minLength": 1, "pattern": "\\S" },

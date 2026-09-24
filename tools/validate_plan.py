@@ -26,7 +26,11 @@ TASK_FIELDS = {
     "validation_commands",
     "risk",
     "parallel_group",
+    "routing",
 }
+ROUTING_FIELDS = {"quality_floor", "selection_reason", "cost_evidence", "reasoning_effort", "uncertainty"}
+REQUIRED_ROUTING_FIELDS = {"quality_floor", "selection_reason", "cost_evidence"}
+COST_EVIDENCE = {"host_reported", "qualitative", "unknown"}
 PLAN_STATUSES = {"draft", "ready", "in_progress", "blocked", "complete"}
 RISKS = {"low", "medium", "high", "critical"}
 IDENTIFIER = re.compile(r"^[A-Za-z][A-Za-z0-9_-]*$")
@@ -173,7 +177,7 @@ def _validate_tasks(tasks: Any, registry: dict[str, set[str]], errors: list[str]
     task_values: list[dict[str, Any]] = []
     for index, task in enumerate(tasks):
         path = f"$.tasks[{index}]"
-        if not _check_object(task, path, TASK_FIELDS - {"parallel_group"}, TASK_FIELDS, errors):
+        if not _check_object(task, path, TASK_FIELDS - {"parallel_group", "routing"}, TASK_FIELDS, errors):
             task_values.append({})
             continue
         task_values.append(task)
@@ -197,6 +201,22 @@ def _validate_tasks(tasks: Any, registry: dict[str, set[str]], errors: list[str]
             not isinstance(task["risk"], str) or task["risk"] not in RISKS
         ):
             errors.append(f"{path}.risk: expected one of {', '.join(sorted(RISKS))}")
+
+        if "routing" in task:
+            route = task["routing"]
+            route_path = f"{path}.routing"
+            if _check_object(route, route_path, REQUIRED_ROUTING_FIELDS, ROUTING_FIELDS, errors):
+                for field in ("quality_floor", "selection_reason"):
+                    if field in route:
+                        _non_empty_string(route[field], f"{route_path}.{field}", errors)
+                for field in ("reasoning_effort", "uncertainty"):
+                    if field in route:
+                        _non_empty_string(route[field], f"{route_path}.{field}", errors)
+                if "cost_evidence" in route and (
+                    not isinstance(route["cost_evidence"], str)
+                    or route["cost_evidence"] not in COST_EVIDENCE
+                ):
+                    errors.append(f"{route_path}.cost_evidence: expected one of {', '.join(sorted(COST_EVIDENCE))}")
 
         role = task.get("role")
         model = task.get("model")

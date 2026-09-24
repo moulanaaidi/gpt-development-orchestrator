@@ -6,6 +6,11 @@
 ## Context
 <Relevant repository facts, instructions, interfaces, and decisions>
 
+## Routing
+- Exact host-available model and reasoning level:
+- Quality floor and why this choice is likely to meet it:
+- Expected usage or correction tradeoff, including unknowns:
+
 ## Owned write set
 - `path/to/owned/file`
 

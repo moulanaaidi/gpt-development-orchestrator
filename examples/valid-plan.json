@@ -7,17 +7,22 @@
     "status": "ready"
   },
   "model_registry": {
-    "sol": ["gpt-6-sol"],
-    "luna": ["gpt-6-luna"],
-    "terra": ["gpt-5.6-terra"]
+    "controller": ["sample-controller"],
+    "worker": ["sample-worker"]
   },
   "tasks": [
     {
       "id": "API-01",
       "title": "Implement health endpoint",
       "readiness": "ready",
-      "role": "luna",
-      "model": "gpt-6-luna",
+      "role": "worker",
+      "model": "sample-worker",
+      "routing": {
+        "quality_floor": "Small API change with a focused automated test",
+        "selection_reason": "Example worker is assumed suitable for bounded API work",
+        "cost_evidence": "unknown",
+        "uncertainty": "Replace sample IDs and reassess from the current host before dispatch"
+      },
       "dependencies": [],
       "write_set": ["src/api/health.py", "tests/test_health.py"],
       "mutates": true,
@@ -33,8 +38,8 @@
       "id": "DOC-01",
       "title": "Document the endpoint",
       "readiness": "ready",
-      "role": "luna",
-      "model": "gpt-6-luna",
+      "role": "worker",
+      "model": "sample-worker",
       "dependencies": ["API-01"],
       "write_set": ["docs/api-health.md"],
       "mutates": true,

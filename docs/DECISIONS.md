@@ -13,10 +13,10 @@ business governance and approval requirements.
 **Decision:** Version 0.1 uses Codex native subagents with explicit, host-
 available GPT model selection and role-based routing.
 
-**Reason:** Native delegation exposes Sol-, Terra-, and Luna-class workers in
-the current environment. An external API router would add credentials, cost
-controls, failure modes, and maintenance without improving the initial goal.
-Lower-cost GPT versions may be configured when the host actually exposes them.
+**Reason:** Native delegation exposes a set of GPT workers in the current
+environment. An external API router would add credentials, cost controls,
+failure modes, and maintenance without improving the initial goal. ADR-008
+defines how available workers are chosen per session.
 
 ## ADR-003: Sol Retains Final Authority
 
@@ -57,3 +57,15 @@ credentials, or mutates production systems.
 
 **Reason:** Delegation changes who performs bounded code work, not what the user
 has authorized.
+
+## ADR-008: Session-Specific Model Choice
+
+**Decision:** Routing compares the models and reasoning levels exposed by the
+current host against each task's quality floor and expected total effort. Model
+IDs live in session plans, not permanent routing rules. Missing price or
+quality data is recorded as unknown.
+
+**Reason:** Versioned model rankings become stale. A lower per-message price
+does not guarantee lower total usage when review and retries are counted. Host
+descriptions and observed outcomes can inform a choice, but this workflow
+cannot prove a globally optimal model without reliable measurements.

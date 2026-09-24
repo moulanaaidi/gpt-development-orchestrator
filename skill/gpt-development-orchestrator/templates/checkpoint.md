@@ -22,6 +22,12 @@
 - Result:
 - Not run / known gaps:
 
+## Routing feedback
+- Model and task type:
+- First attempt met acceptance (yes/no/unknown):
+- Corrections and extra review needed:
+- Usage or cost observed (or unknown):
+
 ## Next action
 <One concrete action>
 
