@@ -28,6 +28,7 @@ from .filesystem import (
 from .paths import (
     POLICY_BEGIN,
     POLICY_END,
+    WORKER_ROLE_NAME,
     assert_managed_layout,
     backups_root,
     default_skill_source,
@@ -37,6 +38,7 @@ from .paths import (
     policy_path,
     receipts_root,
     resolve_codex_home,
+    worker_role_path,
 )
 
 
@@ -99,6 +101,10 @@ def _read_policy_source(path: Path) -> bytes:
     return path.read_bytes()
 
 
+def _worker_source_path(source_skill: Path) -> Path:
+    return source_skill / "agents" / f"{WORKER_ROLE_NAME}.toml"
+
+
 def _validate_source(source_skill: Path) -> str:
     try:
         ensure_plain_directory(source_skill, "Skill source")
@@ -110,12 +116,16 @@ def _validate_source(source_skill: Path) -> str:
             "Build or provide the skill package before applying installation."
         )
     entrypoint = source_skill / "SKILL.md"
+    worker_source = _worker_source_path(source_skill)
     try:
         ensure_plain_file_or_missing(entrypoint, "Skill source SKILL.md")
+        ensure_plain_file_or_missing(worker_source, "Luna worker role source")
     except FileSafetyError as error:
         raise InstallerError(str(error)) from error
     if not entrypoint.exists():
         raise InstallerError(f"Skill source requires a regular SKILL.md file: {entrypoint}")
+    if not worker_source.exists():
+        raise InstallerError(f"Skill source requires the Luna worker role: {worker_source}")
     return directory_digest(source_skill)
 
 
@@ -174,6 +184,9 @@ def _build_receipt(
     source_digest: str,
     skill_changed: bool,
     skill_existed: bool,
+    worker_changed: bool,
+    worker_existed: bool,
+    post_worker: bytes,
     policy_changed: bool,
     policy_existed: bool,
     post_policy: bytes | None,
@@ -190,6 +203,11 @@ def _build_receipt(
                 "changed": skill_changed,
                 "preexisting": skill_existed,
                 "post_digest": source_digest if skill_changed else None,
+            },
+            "worker": {
+                "changed": worker_changed,
+                "preexisting": worker_existed,
+                "post_digest": file_digest(post_worker) if worker_changed else None,
             },
             "policy": {
                 "changed": policy_changed,
@@ -215,12 +233,16 @@ def _restore_skill_snapshot(destination: Path, backup_root: Path, preexisting: b
         atomic_remove_directory(destination)
 
 
-def _restore_policy_snapshot(destination: Path, backup_root: Path, preexisting: bool) -> None:
+def _restore_file_snapshot(
+    destination: Path,
+    backup_file: Path,
+    preexisting: bool,
+    label: str,
+) -> None:
     if preexisting:
-        prior_policy = backup_root / "policy"
-        if not prior_policy.is_file():
-            raise InstallerError(f"Required policy backup is missing: {prior_policy}")
-        atomic_write_bytes(destination, prior_policy.read_bytes())
+        if not backup_file.is_file():
+            raise InstallerError(f"Required {label} backup is missing: {backup_file}")
+        atomic_write_bytes(destination, backup_file.read_bytes())
     else:
         destination.unlink(missing_ok=True)
 
@@ -234,16 +256,23 @@ def install(
     policy_source: str | Path | None = None,
     receipt_path: str | Path | None = None,
 ) -> InstallResult:
-    """Preview or apply a skill installation. Mutation requires ``apply=True``."""
+    """Preview or apply a skill and Luna worker installation. Mutation requires apply=True."""
     home = resolve_codex_home(codex_home)
     try:
         assert_managed_layout(home)
     except RuntimeError as error:
         raise InstallerError(str(error)) from error
+
     source = Path(source_skill).expanduser().resolve() if source_skill else default_skill_source()
     source_digest = _validate_source(source)
     destination = installed_skill_path(home)
+    worker_source = _worker_source_path(source)
+    destination_worker = worker_role_path(home)
     ensure_plain_directory(destination, "Installed skill")
+    ensure_plain_file_or_missing(destination_worker, "Luna worker role")
+
+    desired_worker = worker_source.read_bytes()
+    existing_worker = destination_worker.read_bytes() if destination_worker.exists() else b""
 
     policy_content: bytes | None = None
     destination_policy = policy_path(home)
@@ -254,6 +283,7 @@ def install(
 
     current_digest = directory_digest(destination) if destination.exists() else None
     skill_changed = current_digest != source_digest
+    worker_changed = existing_worker != desired_worker
     existing_policy = destination_policy.read_bytes() if with_policy and destination_policy.exists() else b""
     desired_policy = _replace_owned_policy_block(existing_policy, policy_content) if policy_content is not None else None
     policy_changed = desired_policy is not None and desired_policy != existing_policy
@@ -263,11 +293,14 @@ def install(
         actions.append(f"install skill: {source} -> {destination}")
     else:
         actions.append(f"skill already matches source: {destination}")
+    actions.append(
+        f"{'install' if worker_changed else 'retain'} GPT-6 Luna worker role: {destination_worker}"
+    )
     if with_policy:
         actions.append(
             f"{'merge' if policy_changed else 'retain'} explicitly requested policy block: {destination_policy}"
         )
-    if not skill_changed and not policy_changed:
+    if not skill_changed and not worker_changed and not policy_changed:
         actions.append("no changes required; no receipt will be created")
         return InstallResult(applied=apply, changed=False, actions=actions)
 
@@ -283,23 +316,33 @@ def install(
         try:
             assert_managed_layout(home)
             ensure_plain_directory(destination, "Installed skill")
+            ensure_plain_file_or_missing(destination_worker, "Luna worker role")
             ensure_plain_file_or_missing(destination_policy, "AGENTS.md")
         except (RuntimeError, FileSafetyError) as error:
             raise InstallerError(str(error)) from error
+
         locked_digest = directory_digest(destination) if destination.exists() else None
+        locked_worker = destination_worker.read_bytes() if destination_worker.exists() else b""
         locked_policy = destination_policy.read_bytes() if with_policy and destination_policy.exists() else b""
-        if locked_digest != current_digest or locked_policy != existing_policy:
+        if locked_digest != current_digest or locked_worker != existing_worker or locked_policy != existing_policy:
             raise InstallerError(
                 "Managed installation state changed before the lock was acquired; review it and retry."
             )
+
         backup_root = _receipt_backup_root(home, install_id)
         skill_existed = destination.exists()
+        worker_existed = destination_worker.exists()
         policy_existed = destination_policy.exists()
+
         if skill_changed and skill_existed:
             copy_directory_snapshot(destination, backup_root / "skill")
+        if worker_changed and worker_existed:
+            (backup_root / "worker").parent.mkdir(parents=True, exist_ok=True)
+            atomic_write_bytes(backup_root / "worker", existing_worker)
         if policy_changed and policy_existed:
             (backup_root / "policy").parent.mkdir(parents=True, exist_ok=True)
             atomic_write_bytes(backup_root / "policy", existing_policy)
+
         receipt_data = _build_receipt(
             install_id=install_id,
             codex_home=home,
@@ -307,20 +350,29 @@ def install(
             source_digest=source_digest,
             skill_changed=skill_changed,
             skill_existed=skill_existed,
+            worker_changed=worker_changed,
+            worker_existed=worker_existed,
+            post_worker=desired_worker,
             policy_changed=policy_changed,
             policy_existed=policy_existed,
             post_policy=desired_policy,
         )
+
         staged = stage_directory_copy(source, destination.parent, destination.name) if skill_changed else None
         if staged is not None and directory_digest(staged) != source_digest:
             shutil.rmtree(staged, ignore_errors=True)
             raise InstallerError("Skill source changed while it was being staged; review it and retry.")
+
         skill_published = False
+        worker_published = False
         policy_published = False
         try:
             if staged is not None:
                 atomic_replace_directory(staged, destination)
                 skill_published = True
+            if worker_changed:
+                atomic_write_bytes(destination_worker, desired_worker)
+                worker_published = True
             if policy_changed and desired_policy is not None:
                 atomic_write_bytes(destination_policy, desired_policy)
                 policy_published = True
@@ -329,17 +381,27 @@ def install(
             rollback_errors: list[str] = []
             try:
                 if policy_published:
-                    _restore_policy_snapshot(destination_policy, backup_root, policy_existed)
-            except Exception as rollback_error:  # pragma: no cover - catastrophic filesystem failure
+                    _restore_file_snapshot(
+                        destination_policy, backup_root / "policy", policy_existed, "policy"
+                    )
+            except Exception as rollback_error:
+                rollback_errors.append(str(rollback_error))
+            try:
+                if worker_published:
+                    _restore_file_snapshot(
+                        destination_worker, backup_root / "worker", worker_existed, "worker role"
+                    )
+            except Exception as rollback_error:
                 rollback_errors.append(str(rollback_error))
             try:
                 if skill_published:
                     _restore_skill_snapshot(destination, backup_root, skill_existed)
-            except Exception as rollback_error:  # pragma: no cover - catastrophic filesystem failure
+            except Exception as rollback_error:
                 rollback_errors.append(str(rollback_error))
             if rollback_errors:
                 raise InstallerError("Installation failed and rollback also failed: " + "; ".join(rollback_errors))
             raise
+
     actions.append("applied atomically with managed backup snapshots")
     return InstallResult(applied=True, changed=True, actions=actions, receipt_path=receipt)
 
@@ -360,9 +422,16 @@ def _load_receipt(path: Path) -> dict[str, object]:
     if not isinstance(codex_home, str) or not codex_home.strip():
         raise InstallerError("Undo receipt is missing required identity fields.")
     operations = data.get("operations")
-    if not isinstance(operations, dict) or set(operations) != {"skill", "policy"}:
+    if not isinstance(operations, dict):
         raise InstallerError("Undo receipt is missing operation metadata.")
-    for name in ("skill", "policy"):
+
+    names = set(operations)
+    if names == {"skill", "policy"}:
+        operations["worker"] = {"changed": False, "preexisting": False, "post_digest": None}
+    elif names != {"skill", "worker", "policy"}:
+        raise InstallerError("Undo receipt is missing operation metadata.")
+
+    for name in ("skill", "worker", "policy"):
         operation = operations[name]
         if not isinstance(operation, dict) or set(operation) != {"changed", "preexisting", "post_digest"}:
             raise InstallerError(f"Undo receipt has invalid {name} operation metadata.")
@@ -432,19 +501,28 @@ def undo(
     backup_root = _receipt_backup_root(home, install_id)
     if not is_within(backup_root, backups_root(home)):
         raise InstallerError("Undo receipt resolved an unsafe backup location.")
+
     skill_operation = _operation(receipt, "skill")
+    worker_operation = _operation(receipt, "worker")
     policy_operation = _operation(receipt, "policy")
     destination = installed_skill_path(home)
+    destination_worker = worker_role_path(home)
     destination_policy = policy_path(home)
     ensure_plain_directory(destination, "Installed skill")
+    ensure_plain_file_or_missing(destination_worker, "Luna worker role")
     ensure_plain_file_or_missing(destination_policy, "AGENTS.md")
 
     skill_changed = skill_operation.get("changed") is True
+    worker_changed = worker_operation.get("changed") is True
     policy_changed = policy_operation.get("changed") is True
     actions: list[str] = []
+
     if skill_changed:
         _assert_post_state(target=destination, operation=skill_operation, kind="directory")
         actions.append(f"restore prior skill state: {destination}")
+    if worker_changed:
+        _assert_post_state(target=destination_worker, operation=worker_operation, kind="file")
+        actions.append(f"restore prior Luna worker role: {destination_worker}")
     if policy_changed:
         _assert_post_state(target=destination_policy, operation=policy_operation, kind="file")
         actions.append(f"restore prior AGENTS.md state: {destination_policy}")
@@ -456,27 +534,48 @@ def undo(
 
     with _InstallLock(home):
         post_skill = stage_directory_copy(destination, destination.parent, destination.name) if skill_changed else None
+        post_worker = destination_worker.read_bytes() if worker_changed else None
+        post_worker_mode = regular_file_mode(destination_worker) if worker_changed else None
         post_policy = destination_policy.read_bytes() if policy_changed else None
         post_policy_mode = regular_file_mode(destination_policy) if policy_changed else None
         skill_restored = False
+        worker_restored = False
         try:
             if skill_changed:
                 _restore_skill_snapshot(destination, backup_root, skill_operation.get("preexisting") is True)
                 skill_restored = True
+            if worker_changed:
+                _restore_file_snapshot(
+                    destination_worker,
+                    backup_root / "worker",
+                    worker_operation.get("preexisting") is True,
+                    "worker role",
+                )
+                worker_restored = True
             if policy_changed:
-                _restore_policy_snapshot(destination_policy, backup_root, policy_operation.get("preexisting") is True)
+                _restore_file_snapshot(
+                    destination_policy,
+                    backup_root / "policy",
+                    policy_operation.get("preexisting") is True,
+                    "policy",
+                )
         except Exception:
             rollback_errors: list[str] = []
             try:
                 if policy_changed and post_policy is not None:
                     atomic_write_bytes(destination_policy, post_policy, mode=post_policy_mode)
-            except Exception as rollback_error:  # pragma: no cover - catastrophic filesystem failure
+            except Exception as rollback_error:
+                rollback_errors.append(str(rollback_error))
+            try:
+                if worker_restored and post_worker is not None:
+                    atomic_write_bytes(destination_worker, post_worker, mode=post_worker_mode)
+            except Exception as rollback_error:
                 rollback_errors.append(str(rollback_error))
             try:
                 if skill_restored and post_skill is not None:
                     atomic_replace_directory(post_skill, destination)
                     post_skill = None
-            except Exception as rollback_error:  # pragma: no cover - catastrophic filesystem failure
+            except Exception as rollback_error:
                 rollback_errors.append(str(rollback_error))
             if rollback_errors:
                 raise InstallerError("Undo failed and rollback to installed state also failed: " + "; ".join(rollback_errors))
@@ -484,5 +583,7 @@ def undo(
         finally:
             if post_skill is not None and post_skill.exists():
                 shutil.rmtree(post_skill, ignore_errors=True)
+
     actions.append("undo applied using the managed receipt backup")
     return UndoResult(applied=True, changed=True, actions=actions)
+

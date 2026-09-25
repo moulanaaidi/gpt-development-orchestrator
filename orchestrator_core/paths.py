@@ -7,6 +7,7 @@ from pathlib import Path
 
 
 SKILL_NAME = "gpt-development-orchestrator"
+WORKER_ROLE_NAME = "gpt_luna_builder"
 MANAGED_DIRECTORY = ".gpt-development-orchestrator"
 POLICY_BEGIN = "<!-- GPT-DEVELOPMENT-ORCHESTRATOR:BEGIN -->"
 POLICY_END = "<!-- GPT-DEVELOPMENT-ORCHESTRATOR:END -->"
@@ -43,6 +44,10 @@ def receipts_root(codex_home: Path) -> Path:
 
 def installed_skill_path(codex_home: Path) -> Path:
     return codex_home / "skills" / SKILL_NAME
+
+
+def worker_role_path(codex_home: Path) -> Path:
+    return codex_home / "agents" / f"{WORKER_ROLE_NAME}.toml"
 
 
 def policy_path(codex_home: Path) -> Path:
@@ -89,6 +94,7 @@ def assert_managed_layout(codex_home: Path) -> None:
     home = codex_home.resolve()
     for path, label in (
         (installed_skill_path(home), "Installed skill"),
+        (worker_role_path(home), "Luna worker role"),
         (policy_path(home), "AGENTS.md"),
         (managed_root(home), "Managed state"),
         (receipts_root(home), "Managed receipts"),
