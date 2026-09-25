@@ -1,25 +1,21 @@
 # Planning
 
-Sol owns the plan. First understand the repository's instructions, architecture, current worktree, and relevant implementation. Do not plan from the request alone when local context can change the answer.
+Planning exists to remove decisions from the implementation worker, not to duplicate implementation detail.
 
-## Plan only what the task needs
+Reuse an approved specification or repository plan whenever one already settles the relevant product and architecture decisions. Do not create a competing plan just because this skill is active.
 
-- For a contained task, use a short checklist and clear acceptance criteria; do not manufacture phases or paperwork.
-- For substantial work, define the intended outcome, in-scope and out-of-scope behavior, interfaces or invariants, dependencies, task owners/models, disjoint write sets, acceptance criteria, validation commands, and material risks. Record why the chosen model is likely to meet the quality floor at reasonable total effort.
-- Mark blocked tasks explicitly and do not delegate them until their dependency is resolved.
-- State assumptions where evidence is missing. Ask the user only when a material decision cannot be safely inferred.
-- Preserve target-repository conventions and policies. This skill does not replace them.
-- For visual product work, identify one representative production-quality screen,
-  its visual acceptance criteria, and the Sol direction-approval gate before
-  scaling. Require user approval only when target-repository policy says so.
-- Separate visual acceptance from structural validation. Record observable
-  visual qualities and interaction checks alongside, not instead of, behavior,
-  accessibility, and automated validation.
-- Keep plans concise: link to authoritative repository instructions and design
-  sources rather than copying their contents.
+For new substantial work, the Sol-class planner should establish only what the worker needs to execute safely:
 
-Use [../templates/plan.md](../templates/plan.md) as an optional starting point. If the repository has a machine-readable plan contract, use and validate that contract instead of treating the markdown template as authoritative.
+- observable objective and non-goals;
+- relevant repository evidence and existing conventions;
+- interfaces, invariants, data or API contracts;
+- failure behavior and material security or production constraints;
+- one coherent implementation bundle or a small number of dependency-ordered bundles;
+- bounded write scope;
+- acceptance criteria and focused validation commands.
 
-## Ready-to-delegate test
+Prefer vertical bundles that can be implemented and verified end to end. Do not divide work by every file, function, or five-minute step.
 
-A task is ready only when its worker can identify the expected result, permitted paths, relevant interfaces, acceptance checks, and return format without making a product or architecture decision on Sol's behalf. Resolve shared interfaces before dispatching parallel work.
+A task is ready when GPT-6 Luna can discover the local implementation details, make routine coding choices from repository conventions, implement, test, and debug without inventing product or architecture decisions.
+
+Keep plans concise. Link to authoritative repository documents instead of copying them.

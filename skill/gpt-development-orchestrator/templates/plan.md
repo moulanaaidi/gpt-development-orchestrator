@@ -7,32 +7,30 @@
 - In scope:
 - Out of scope:
 
-## Context and constraints
-- Repository instructions / authoritative links (summarize only task-specific context):
-- Interfaces, invariants, or design decisions:
-- Assumptions and unresolved decisions:
-- For visual work: representative screen, visual acceptance, and Sol direction gate:
+## Contracts and constraints
+- Existing repository rules / authoritative paths:
+- Interfaces, invariants, API/data contracts:
+- Material security or production constraints:
+- Assumptions that would block implementation if false:
 
-## Tasks
-| ID | Depends on | Exact available model / selection reason | Write set | Acceptance and validation | Status |
-| --- | --- | --- | --- | --- | --- |
-| T1 | - | Current host model; quality floor and cost/quality uncertainty | `path/**` | Observable checks and commands | ready |
+## Implementation bundle
+- Worker: GPT-6 Luna
+- Owned write scope:
+- Dependencies already settled:
+- Acceptance criteria:
+- Focused validation commands:
 
-## Integration and review
-- Shared contracts to settle before parallel work:
-- Sol specification review:
-- Sol engineering review:
-- Visual acceptance evidence (if applicable), separate from structural validation:
-- Combined validation:
+Keep this as one coherent vertical bundle unless a genuine dependency boundary requires another phase.
 
-## Risks and authorization boundaries
-- Material risks / mitigations:
-- External, credential, source-control, or production actions requiring separate authorization:
-- Correction budget: one initial attempt plus at most two correction cycles; same-outcome replanning does not reset it.
+## Review
+One batched Sol review uses two lenses:
+1. specification compliance;
+2. engineering quality/security.
+
+Default correction budget: one consolidated correction cycle.
 
 ## Completion
 - [ ] Acceptance criteria met
-- [ ] Actual diffs reviewed by Sol in both passes
-- [ ] Combined checks recorded
-- [ ] Continuity checkpoint updated if work continues later
-- [ ] Final status and remaining risks reported
+- [ ] Worker validation recorded
+- [ ] Actual diff reviewed once
+- [ ] Remaining risks reported

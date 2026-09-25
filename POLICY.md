@@ -1,46 +1,21 @@
-For every code or file implementation task, including small or apparently
-trivial changes, follow this workflow: an actual Sol-authored plan first, a
-bounded implementation by a lower GPT worker selected from model choices
-advertised by the current host using its native delegation mechanism, then an
-independent two-pass review by Sol (specification compliance, then engineering
-quality and risk). There is no silent local-implementation bypass based on task
-size. Read-only questions and read-only reviews do not require an implementation
-worker.
+## Thin-root development orchestration
 
-When the active root agent is not Sol, it must delegate planning and final
-review to Sol. It must not claim to be Sol or assert a model identity it cannot
-verify. Distinguish host invocation evidence (such as host-provided model and
-agent identity) from self-reported receipts in prompts or worker output; a
-receipt alone does not prove which model or agent ran.
+Use the orchestration skill for substantial multi-file features, migrations, refactors, or builds. Do not force orchestration onto trivial edits, read-only questions, or explicitly single-agent work.
 
-Before implementation in a session, check once that the host exposes a
-suitable Sol for planning and final review, native delegation, suitable
-advertised lower-GPT choices, and a way to verify invocation identity. Verify
-identity evidence for every Sol and worker invocation. Recheck capability
-compatibility if the host changes or an invocation fails. If the required Sol
-planning or review role, suitable lower-GPT worker, native delegation, or
-invocation-identity evidence is unavailable, fail closed: stop and report; do
-not implement or repeatedly retry unchanged missing evidence. Never guess a
-model identifier or use an external router.
+There are two supported paths.
 
-Each implementation gets an initial worker attempt and at most two correction
-cycles. If still unresolved, stop and report the remaining findings to Sol for
-a decision. Replanning the same intended outcome does not reset this limit.
-Sol owns architecture, acceptance, integration, and final approval; workers
-implement only their exact bounded write sets and never approve their own work.
-Keep secrets out of plans, briefs, checkpoints, and reports. This policy does
-not authorize commits, pushes, merges, publication, deployments, credential
-changes, or production effects.
+1. External approved specification.
+When the user supplies an approved implementation specification from outside Codex, treat that specification as authoritative. If the active Codex session is already using the implementation model, implement it directly. Do not recreate the architecture, re-plan the feature, or add an independent review unless the user explicitly asks for one.
 
-For visual product work, implement one representative production-quality
-screen first. Sol confirms its visual direction before that direction is
-scaled to other screens; seek user approval only when the target repository
-requires it. Treat visual acceptance (appearance, hierarchy, and interaction)
-separately from structural validation (behavior, accessibility, and tests).
+2. In-Codex thin-root orchestration.
+When planning is being done inside Codex, keep a planner/reviewer root focused on scope, architecture, contracts, acceptance criteria, material risk, and final acceptance. After the contract is ready, delegate one coherent implementation bundle through the native `gpt_luna_builder` role, which is pinned to GPT-6 Luna. Luna owns in-scope repository discovery, implementation, testing, debugging, and routine verification.
 
-This global instruction and its accompanying skill are strong process
-guidance, not a technical enforcement boundary. They cannot guarantee
-compliance across all hosts, sessions, or agent configurations. A host-level
-gate that verifies invocation identity and blocks implementation until the
-required Sol plan, worker invocation, and independent Sol review exist is
-required for a technical guarantee.
+For a normal delegated phase, target one planning batch, one dispatch, one wait, one batched independent acceptance review, and one final response. Do not poll a healthy worker, request play-by-play status, duplicate its repository exploration, or split one coherent feature into tiny worker calls for visibility.
+
+Review specification compliance and engineering quality as two lenses in one batched independent review. Send all findings in one correction request and default to at most one correction cycle. A second correction cycle is reserved for a concrete high-assurance issue involving architecture, authentication or authorization, payments, tenancy, secrets, destructive migrations, production behavior, or high-impact shared infrastructure.
+
+Use GPT-6 Luna as the default implementation worker when available. Do not run per-task model ranking, cost analysis, quality-floor comparisons, or model-registry discovery when the approved workflow already names Luna. If the required model or native delegation path is unavailable, report the blocker rather than silently switching models.
+
+One writer owns a path at a time. Parallel workers are optional and should be used only for genuinely independent work with disjoint write sets and separate workspaces. Workers do not approve their own changes.
+
+This workflow does not authorize commits, pushes, merges, publication, deployments, credential changes, production operations, or destructive external actions. Repository policy and explicit user authorization remain authoritative.
