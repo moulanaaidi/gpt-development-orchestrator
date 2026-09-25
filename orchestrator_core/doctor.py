@@ -12,10 +12,12 @@ from .filesystem import FileSafetyError, directory_digest, ensure_plain_director
 from .paths import (
     POLICY_BEGIN,
     POLICY_END,
+    WORKER_ROLE_NAME,
     default_skill_source,
     installed_skill_path,
     policy_path,
     resolve_codex_home,
+    worker_role_path,
 )
 
 
@@ -75,6 +77,28 @@ def _check_installed(destination: Path, source_digest: str | None) -> DoctorChec
     return DoctorCheck("installed-skill", "PASS", "Installed skill matches source integrity digest")
 
 
+def _check_worker_role(destination: Path, source_skill: Path) -> DoctorCheck:
+    source = source_skill / "agents" / f"{WORKER_ROLE_NAME}.toml"
+    try:
+        ensure_plain_file_or_missing(source, "Luna worker role source")
+        ensure_plain_file_or_missing(destination, "Luna worker role")
+        if not source.exists():
+            return DoctorCheck("worker-role", "FAIL", f"Luna worker role source is missing: {source}")
+        if not destination.exists():
+            return DoctorCheck("worker-role", "WARN", f"Not installed: {destination}. Run install.py --apply.")
+        expected = source.read_bytes()
+        actual = destination.read_bytes()
+    except (FileSafetyError, OSError) as error:
+        return DoctorCheck("worker-role", "FAIL", str(error))
+    if actual != expected:
+        return DoctorCheck(
+            "worker-role",
+            "FAIL",
+            "Installed Luna worker role differs from the source. Run install.py --apply after reviewing local changes.",
+        )
+    return DoctorCheck("worker-role", "PASS", "Installed GPT-6 Luna worker role matches source")
+
+
 def _check_policy(path: Path, source: Path) -> DoctorCheck:
     try:
         ensure_plain_file_or_missing(path, "AGENTS.md")
@@ -122,7 +146,7 @@ def _check_policy(path: Path, source: Path) -> DoctorCheck:
 def _check_validator(repository_root: Path) -> DoctorCheck:
     validator = repository_root / "tools" / "validate_plan.py"
     if not validator.is_file():
-        return DoctorCheck("validator", "WARN", "Plan validator is not present yet; complete LUNA-02")
+        return DoctorCheck("validator", "WARN", "Plan validator is not present yet")
     try:
         completed = subprocess.run(
             [sys.executable, str(validator), "--help"],
@@ -155,6 +179,7 @@ def run_doctor(
         DoctorCheck("codex-home", "PASS", f"Using Codex home: {home}"),
         source_check,
         _check_installed(installed_skill_path(home), source_digest),
+        _check_worker_role(worker_role_path(home), source),
         _check_policy(policy_path(home), policy),
         _check_validator(repository_root),
     ]
