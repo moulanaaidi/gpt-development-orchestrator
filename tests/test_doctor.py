@@ -17,6 +17,11 @@ class DoctorTests(unittest.TestCase):
         self.source = self.root / "skill" / "gpt-development-orchestrator"
         self.source.mkdir(parents=True)
         (self.source / "SKILL.md").write_text("# Skill\n", encoding="utf-8")
+        (self.source / "agents").mkdir()
+        (self.source / "agents" / "gpt_luna_builder.toml").write_text(
+            'name = "gpt_luna_builder"\nmodel = "gpt-6-luna"\n',
+            encoding="utf-8",
+        )
         (self.root / "POLICY.md").write_text("Required generic enforcement policy.\n", encoding="utf-8")
 
     def tearDown(self) -> None:
@@ -29,6 +34,7 @@ class DoctorTests(unittest.TestCase):
         report = run_doctor(codex_home=self.home, source_skill=self.source)
         self.assertFalse(report.healthy)
         self.assertEqual(self._check(report, "installed-skill").status, "WARN")
+        self.assertEqual(self._check(report, "worker-role").status, "WARN")
         self.assertEqual(self._check(report, "policy").status, "FAIL")
         self.assertFalse(self.home.exists())
 
@@ -37,12 +43,14 @@ class DoctorTests(unittest.TestCase):
         report = run_doctor(codex_home=self.home, source_skill=self.source)
         self.assertFalse(report.healthy)
         self.assertEqual(self._check(report, "installed-skill").status, "PASS")
+        self.assertEqual(self._check(report, "worker-role").status, "PASS")
         self.assertEqual(self._check(report, "policy").status, "FAIL")
 
     def test_reports_matching_global_policy(self) -> None:
         install(codex_home=self.home, source_skill=self.source, with_policy=True, apply=True)
         report = run_doctor(codex_home=self.home, source_skill=self.source)
         self.assertTrue(report.healthy)
+        self.assertEqual(self._check(report, "worker-role").status, "PASS")
         self.assertEqual(self._check(report, "policy").status, "PASS")
 
     def test_reports_matching_custom_policy_source(self) -> None:
@@ -60,6 +68,7 @@ class DoctorTests(unittest.TestCase):
             source_skill=self.source,
             policy_source=custom_policy,
         )
+        self.assertEqual(self._check(report, "worker-role").status, "PASS")
         self.assertEqual(self._check(report, "policy").status, "PASS")
 
         default_source_report = run_doctor(codex_home=self.home, source_skill=self.source)
@@ -83,6 +92,14 @@ class DoctorTests(unittest.TestCase):
         report = run_doctor(codex_home=self.home, source_skill=self.source)
         self.assertFalse(report.healthy)
         self.assertEqual(self._check(report, "installed-skill").status, "FAIL")
+
+    def test_detects_worker_role_difference(self) -> None:
+        install(codex_home=self.home, source_skill=self.source, apply=True)
+        worker = self.home / "agents" / "gpt_luna_builder.toml"
+        worker.write_text('model = "something-else"\n', encoding="utf-8")
+        report = run_doctor(codex_home=self.home, source_skill=self.source)
+        self.assertFalse(report.healthy)
+        self.assertEqual(self._check(report, "worker-role").status, "FAIL")
 
     def test_detects_incomplete_policy_markers(self) -> None:
         agents = self.home / "AGENTS.md"
