@@ -37,7 +37,10 @@ class CliLifecycleTests(unittest.TestCase):
             )
             self.assertIn("APPLIED: changes planned/applied", applied.stdout)
             skill = home / "skills" / "gpt-development-orchestrator"
+            worker = home / "agents" / "gpt_luna_builder.toml"
             self.assertTrue((skill / "SKILL.md").is_file())
+            self.assertTrue(worker.is_file())
+            self.assertIn('model = "gpt-6-luna"', worker.read_text(encoding="utf-8"))
             self.assertTrue((home / "AGENTS.md").is_file())
 
             receipts = list(
@@ -49,6 +52,7 @@ class CliLifecycleTests(unittest.TestCase):
             doctor = self.run_cli("doctor", "--codex-home", home_arg)
             self.assertIn("PASS python", doctor.stdout)
             self.assertIn("PASS installed-skill", doctor.stdout)
+            self.assertIn("PASS worker-role", doctor.stdout)
             self.assertIn("PASS policy", doctor.stdout)
 
             reapplied = self.run_cli(
@@ -60,10 +64,12 @@ class CliLifecycleTests(unittest.TestCase):
             undo_preview = self.run_cli("undo", "--receipt", receipt)
             self.assertIn("PREVIEW: undo planned/applied", undo_preview.stdout)
             self.assertTrue(skill.exists())
+            self.assertTrue(worker.exists())
 
             undo_applied = self.run_cli("undo", "--receipt", receipt, "--apply")
             self.assertIn("APPLIED: undo planned/applied", undo_applied.stdout)
             self.assertFalse(skill.exists())
+            self.assertFalse(worker.exists())
             self.assertFalse((home / "AGENTS.md").exists())
 
     def test_doctor_accepts_custom_policy_source(self) -> None:
@@ -89,6 +95,7 @@ class CliLifecycleTests(unittest.TestCase):
                 "--policy-file",
                 str(policy),
             )
+            self.assertIn("PASS worker-role", doctor.stdout)
             self.assertIn("PASS policy", doctor.stdout)
 
 

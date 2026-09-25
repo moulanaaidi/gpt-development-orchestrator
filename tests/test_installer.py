@@ -23,6 +23,11 @@ class InstallerTests(unittest.TestCase):
         (self.source / "SKILL.md").write_text("# Skill\n", encoding="utf-8")
         (self.source / "references").mkdir()
         (self.source / "references" / "workflow.md").write_text("workflow\n", encoding="utf-8")
+        (self.source / "agents").mkdir()
+        (self.source / "agents" / "gpt_luna_builder.toml").write_text(
+            'name = "gpt_luna_builder"\nmodel = "gpt-6-luna"\n',
+            encoding="utf-8",
+        )
         self.policy = self.root / "POLICY.md"
         self.policy.write_text("Use the orchestrator for substantial work.\n", encoding="utf-8")
 
@@ -32,6 +37,10 @@ class InstallerTests(unittest.TestCase):
     @property
     def destination(self) -> Path:
         return self.home / "skills" / "gpt-development-orchestrator"
+
+    @property
+    def worker(self) -> Path:
+        return self.home / "agents" / "gpt_luna_builder.toml"
 
     def test_preview_does_not_create_home_or_receipt(self) -> None:
         result = install(codex_home=self.home, source_skill=self.source)
@@ -45,6 +54,8 @@ class InstallerTests(unittest.TestCase):
         first = install(codex_home=self.home, source_skill=self.source, apply=True)
         self.assertTrue(first.changed)
         self.assertTrue((self.destination / "SKILL.md").is_file())
+        self.assertTrue(self.worker.is_file())
+        self.assertIn('model = "gpt-6-luna"', self.worker.read_text(encoding="utf-8"))
         self.assertIsNotNone(first.receipt_path)
         self.assertTrue(first.receipt_path.is_file())
 
@@ -78,6 +89,8 @@ class InstallerTests(unittest.TestCase):
         (self.destination / "old.txt").write_text("old skill", encoding="utf-8")
         agents = self.home / "AGENTS.md"
         agents.write_text("Existing policy\n", encoding="utf-8")
+        self.worker.parent.mkdir(parents=True)
+        self.worker.write_text("old worker role\n", encoding="utf-8")
 
         result = install(
             codex_home=self.home,
@@ -87,6 +100,7 @@ class InstallerTests(unittest.TestCase):
             policy_source=self.policy,
         )
         self.assertTrue((self.destination / "SKILL.md").is_file())
+        self.assertIn('model = "gpt-6-luna"', self.worker.read_text(encoding="utf-8"))
         policy_text = agents.read_text(encoding="utf-8")
         self.assertIn(POLICY_BEGIN, policy_text)
         self.assertIn(POLICY_END, policy_text)
@@ -97,6 +111,7 @@ class InstallerTests(unittest.TestCase):
         restored = undo(result.receipt_path, apply=True)
         self.assertTrue(restored.applied)
         self.assertEqual((self.destination / "old.txt").read_text(encoding="utf-8"), "old skill")
+        self.assertEqual(self.worker.read_text(encoding="utf-8"), "old worker role\n")
         self.assertEqual(agents.read_text(encoding="utf-8"), "Existing policy\n")
 
     def test_undo_removes_new_targets(self) -> None:
@@ -109,6 +124,7 @@ class InstallerTests(unittest.TestCase):
         )
         undo(result.receipt_path, apply=True)
         self.assertFalse(self.destination.exists())
+        self.assertFalse(self.worker.exists())
         self.assertFalse((self.home / "AGENTS.md").exists())
 
     def test_undo_refuses_changed_installed_skill(self) -> None:
@@ -205,6 +221,12 @@ class InstallerTests(unittest.TestCase):
         entrypoint.unlink()
         entrypoint.mkdir()
         with self.assertRaisesRegex(InstallerError, "SKILL.md"):
+            install(codex_home=self.home, source_skill=self.source)
+        self.assertFalse(self.home.exists())
+
+    def test_source_requires_worker_role(self) -> None:
+        (self.source / "agents" / "gpt_luna_builder.toml").unlink()
+        with self.assertRaisesRegex(InstallerError, "Luna worker role"):
             install(codex_home=self.home, source_skill=self.source)
         self.assertFalse(self.home.exists())
 
@@ -309,9 +331,16 @@ class InstallerTests(unittest.TestCase):
         )
         installed_digest = directory_digest(self.destination)
         installed_policy = agents.read_bytes()
+        from orchestrator_core.installer import _restore_file_snapshot as real_restore_file
+
+        def restore_with_policy_failure(destination, backup_file, preexisting, label):
+            if label == "policy":
+                raise OSError("injected policy restore failure")
+            return real_restore_file(destination, backup_file, preexisting, label)
+
         with patch(
-            "orchestrator_core.installer._restore_policy_snapshot",
-            side_effect=OSError("injected policy restore failure"),
+            "orchestrator_core.installer._restore_file_snapshot",
+            side_effect=restore_with_policy_failure,
         ):
             with self.assertRaisesRegex(OSError, "injected policy restore failure"):
                 undo(result.receipt_path, apply=True)
