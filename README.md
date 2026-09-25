@@ -1,141 +1,163 @@
 # GPT Development Orchestrator
 
-A reusable, GPT-only development workflow for Codex projects.
+A thin-root development workflow for Codex.
 
-Sol owns the actual plan, architecture, design, routing, integration, and
-independent final review. Every code or file implementation task, including
-small changes, is implemented by a bounded lower-GPT worker selected from
-current host-advertised choices and invoked through native delegation. Check
-host capability compatibility once per session, verify identity for each
-invocation, and refresh compatibility only after a host change or invocation
-failure. Missing evidence means fail fast, not repeated retries or a local
-implementation fallback. Read-only questions and reviews need no worker.
+**Planner decides. Luna builds. Reviewer accepts.**
 
-An implementation has one initial attempt and at most two correction cycles;
-replanning the same outcome does not reset the limit. For visual product work,
-Sol approves the direction of one representative production-quality screen
-before that direction is scaled. User approval is needed only when the target
-repository requires it. Visual acceptance is assessed separately from
-structural validation. Worker briefs stay compact and link to authoritative
-repository documents instead of repeating their contents.
+The workflow keeps expensive root-model activity focused on high-leverage decisions while GPT-6 Luna owns the high-volume implementation loop: repository discovery inside a bounded scope, coding, focused tests, debugging, and routine verification.
 
-It is product-neutral. Approval rules and business governance remain in each
-target repository.
+It supports two practical ways of working:
 
-## What It Provides
+- **External-plan path:** create and approve the specification in ChatGPT, then give it to a GPT-6 Luna Codex session. Codex implements directly without recreating the plan.
+- **In-Codex path:** a planner/reviewer root plans once, dispatches one coherent bundle to GPT-6 Luna, waits, then reviews the completed diff once.
 
-- A Codex skill with Sol-led planning, delegation, review, and continuity.
-- Session-specific routing that considers task quality, capability, reasoning,
-  expected review and retry effort, and cost information when available.
-- A strict JSON plan contract and standard-library validator.
-- A preview-first installer with explicitly requested global policy integration, atomic writes,
-  backups, receipts, and guarded undo.
-- A read-only doctor and an automated CLI lifecycle test.
+Trivial edits and read-only questions do not need orchestration.
 
-It never grants permission to commit, push, deploy, change credentials, or
-perform production operations.
+## Why this exists
+
+The original 0.1 workflow routed every implementation change through planning, worker delegation, and independent review. That maximized process consistency but also created unnecessary root-model activity and context churn.
+
+Version 0.2 changes the optimization target: preserve strong architecture and review while reducing Codex usage.
+
+Normal delegated work should look like:
+
+```text
+Planner  -> one planning/contract batch
+Luna     -> discover + implement + test + debug + verify
+Reviewer -> one batched acceptance review
+         -> optional one consolidated correction
+```
+
+Do not split a coherent feature into tiny workers, poll a healthy worker, or repeat repository exploration simply for visibility.
+
+## Recommended workflow for limited Codex allowance
+
+Use ChatGPT for planning and independent review, and Codex for implementation:
+
+```text
+ChatGPT planner/reviewer model
+        |
+        v
+approved implementation specification
+        |
+        v
+VS Code + Codex GPT-6 Luna
+        |
+        +-- inspect relevant code
+        +-- implement
+        +-- targeted tests
+        +-- debug/fix
+        +-- concise completion report
+        |
+        v
+Git diff / GitHub
+        |
+        v
+ChatGPT planner/reviewer model
+        |
+        v
+review against specification
+```
+
+In this path, the expensive planning/review work is outside the Codex implementation loop.
+
+## What the package provides
+
+- A Codex skill for thin-root planning, delegation, and review.
+- A native `gpt_luna_builder` role pinned to `gpt-6-luna` at medium reasoning effort.
+- Worker instructions optimized for coherent GPT-6 Luna implementation bundles.
+- Optional plan/task/checkpoint templates.
+- A deterministic JSON plan validator for projects that want a machine-readable contract.
+- A preview-first installer with optional scoped global policy integration.
+- Backups, receipts, guarded undo, and a read-only doctor.
+
+It never grants permission to commit, push, merge, deploy, change credentials, or perform production operations.
 
 ## Requirements
 
-- Python 3.11 or newer.
+- Python 3.11 or newer for installer/validator utilities.
 - A Codex host that supports skills.
-- A host with suitable Sol and lower-GPT workers, advertised model choices, and
-  native delegation is required for implementation tasks. When any prerequisite
-  is missing, the workflow stops and explains the blocker.
-
-The runtime uses only the Python standard library.
+- For the in-Codex delegated path: a capable planner/reviewer model, GPT-6 Luna exposed by the host, and native delegation.
+- For the external-plan path: a GPT-6 Luna Codex session is enough because planning happened outside Codex.
 
 ## Install
 
-Installation targets `CODEX_HOME` when set, otherwise `~/.codex`. Every install
-previews by default and makes no changes.
+Installation targets `CODEX_HOME` when set, otherwise `~/.codex`.
+
+Preview:
 
 ```powershell
 python install.py
 ```
 
-Apply the skill only:
+Apply the skill and native Luna worker role:
 
 ```powershell
 python install.py --apply
 ```
 
-Apply the skill and explicitly add the owned orchestration block to global
-`AGENTS.md`:
+This installs the skill under `$CODEX_HOME/skills/gpt-development-orchestrator/` and the dedicated worker at `$CODEX_HOME/agents/gpt_luna_builder.toml`. It does not change your global default subagent model.
+
+Optionally add the scoped orchestration policy to global `AGENTS.md`:
 
 ```powershell
 python install.py --with-policy --apply
 ```
 
-The policy option preserves content outside its begin/end markers. Applied
-changes produce a receipt under
-`$CODEX_HOME/.gpt-development-orchestrator/receipts/`.
+The policy is optional. It now applies thin-root orchestration only to substantial work and explicitly leaves trivial work alone.
 
-The global policy is opt-in during installation. Once adopted, doctor reports
-missing or stale owned policy as a failure. The policy and skill are strong
-process guidance, not technical enforcement across every host or session; a
-host-level gate that verifies invocation identity and workflow state is needed
-for a technical guarantee.
+## Usage
 
-## Verify And Undo
+### External approved spec
 
-```powershell
-python install.py doctor
-python install.py doctor --json
-python install.py doctor --policy-file <policy-source>
-python install.py undo --receipt <receipt-path>
-python install.py undo --receipt <receipt-path> --apply
-```
-
-Undo also previews by default. It refuses to overwrite a skill or policy that
-changed after the receipt was created.
-
-Doctor compares the installed policy with the same source used by install:
-`<source-skill>/../../POLICY.md`. Pass `--policy-file` when installation used a
-custom policy source.
-
-## Use
-
-Start a new Codex session after installation. Invoke the skill explicitly with:
+Recommended when you want to minimize Codex allowance:
 
 ```text
-$gpt-development-orchestrator plan and execute this development task.
+$gpt-development-orchestrator
+
+Implement the approved specification below.
+Do not redesign or re-plan it. Own repository discovery within scope,
+implementation, targeted tests, debugging, and verification.
+
+SPECIFICATION:
+...
 ```
 
-The skill governs every code or file implementation task. No implementation
-task bypasses the Sol-plan, worker, and independent-Sol-review workflow based
-on size.
+Run this in a GPT-6 Luna Codex session.
 
-Validate a machine-readable plan without executing any command in it:
+### In-Codex orchestration
+
+When the feature still needs design inside Codex:
+
+```text
+$gpt-development-orchestrator plan and execute this substantial feature.
+Keep the planner/reviewer root thin: establish the contract once, give one coherent bundle
+to GPT-6 Luna, wait for completion, and review the final diff once.
+```
+
+## Validation
+
+Validate a machine-readable plan without executing commands inside it:
 
 ```powershell
 python tools/validate_plan.py examples/valid-plan.json
 ```
 
-The example uses illustrative model IDs. Replace its `model_registry` and task
-model IDs with models exposed by your current Codex host before delegation.
-The validator checks internal consistency; it cannot query live availability,
-prices, or measure answer quality. The skill makes the routing choice from host
-descriptions and task evidence, then Sol reviews the result.
-
-## Test
+Run the offline test suite:
 
 ```powershell
 python -m unittest discover -s tests -v
 ```
 
-The suite covers the plan contract, dry-run behavior, installation, policy
-ownership, integrity checks, concurrency changes, receipts, rollback, doctor,
-idempotent reapply, and undo.
+## Design principles
 
-## Documentation
+1. **Reuse approved decisions.** Do not recreate architecture when a trusted specification already exists.
+2. **Coherent worker bundles.** One worker can change many related files and iterate internally.
+3. **Worker-owned implementation loop.** Luna handles normal discovery, code, tests, debugging, and verification.
+4. **Thin root.** Planning and review happen once per meaningful phase, not continuously.
+5. **Batched review.** Specification compliance and engineering quality are two lenses in one review.
+6. **One correction by default.** A second cycle is reserved for concrete high-assurance risk.
+7. **No silent model fallback.** If the required worker is unavailable, report it.
+8. **No unnecessary external effects.** Source-control and production operations still require explicit authorization.
 
-- `docs/ARCHITECTURE.md`: authority, workflow, components, and boundaries.
-- `docs/IMPLEMENTATION-PLAN.md`: version 0.1 work packages and acceptance.
-- `docs/DECISIONS.md`: architecture decisions and rationale.
-- `docs/THREAT-MODEL.md`: assets, threats, controls, and residual risks.
-- `CHECKPOINT.md`: current verified state and next action.
-
-After review, record first-pass success, correction cycles, and usage only
-when reported by the host; otherwise mark usage unknown. These workflow rules
-are guidance, not host enforcement.
+See `docs/ARCHITECTURE.md` and `docs/DECISIONS.md` for the detailed rationale.

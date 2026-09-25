@@ -1,173 +1,116 @@
 # Architecture
 
-## 1. Purpose
+## Purpose
 
-GPT Development Orchestrator is a reusable workflow package for substantial
-software work in Codex. It separates planning and acceptance from bounded
-implementation without introducing an external model router, background
-service, or product-specific governance.
+GPT Development Orchestrator v0.2 is a thin-root workflow for substantial software work. It separates high-leverage planning and acceptance from high-volume implementation.
 
-The first release optimizes for correctness, auditability, portability, and a
-small maintenance surface.
+The design target is simple:
 
-## 2. Authority Model
+```text
+Planner plans once -> GPT-6 Luna builds/tests/debugs -> Reviewer accepts once
+```
 
-The active Sol-class model is the controlling role. Sol owns:
+When a trusted specification was already produced outside Codex, the root can be thinner still:
 
-- repository orientation and requirement clarification;
-- product and technical design when design is part of the assignment;
-- architecture, interfaces, invariants, and acceptance criteria;
-- task decomposition and model selection;
-- review of every delegated change;
-- integration, correction decisions, and final reporting.
+```text
+external approved spec -> GPT-6 Luna implements directly
+```
 
-For every code or file implementation task, including small tasks, a lower GPT
-worker implements a bounded task brief and returns evidence. Workers do not
-redefine the plan or approve their own work. Read-only questions and reviews do
-not require a worker. A non-Sol root delegates plan authorship and final review
-to Sol and must not claim Sol identity.
+## Authority
 
-## 3. Model Routing
+The planner/reviewer owns product and architecture decisions, interfaces, security boundaries, acceptance criteria, and final acceptance.
 
-Sol is a responsibility in this workflow: planning, design, integration, and
-final acceptance. Worker names do not encode a permanent intelligence or price
-ranking. For each session, Sol reads the host's exact available model overrides,
-descriptions, and supported reasoning levels. A plan records the selected IDs
-as a session snapshot; the package itself has no versioned routing table.
+The implementation worker owns routine repository discovery inside its bounded scope, code changes, focused tests, debugging, and verification. It does not redefine the contract or approve its own work.
 
-For each bounded task, Sol sets a quality floor from risk, difficulty, and
-acceptance checks. It then chooses among eligible models using host capability
-descriptions, any disclosed usage or cost class, and observed results on similar
-tasks. The estimate includes execution, review, retries, and integration. If
-cost matters and the host has no figures, current official pricing can be
-checked for the actual billing mode. API prices must not be used as Codex
-subscription consumption estimates. Missing information stays unknown. Stronger
-reasoning is used when necessary for the quality floor, rather than by default.
+## Two execution paths
 
-If a suitable Sol, lower GPT worker, native delegation mechanism, or adequate
-host identity evidence is unavailable, implementation fails closed. Never
-guess model IDs or use an external router. Host-provided invocation evidence is
-distinct from self-reported receipts; receipts alone do not prove identity.
+### External approved specification
 
-Check delegation and identity compatibility once before implementation in a
-session. Verify identity for each Sol and worker invocation; repeat the
-compatibility check only after a host change or invocation failure. Missing
-evidence is a stop condition, not a reason for repeated retries.
+Use this when ChatGPT or another trusted planning step already produced the implementation contract.
 
-After review, Sol records whether the first attempt passed and the corrections
-required. This informs later comparable tasks without creating a permanent
-ranking from one outcome. One or two independent workers are normally enough;
-parallelism is optional, but worker implementation is mandatory for every task.
+A GPT-6 Luna Codex session:
 
-## 4. Runtime Workflow
+1. reads the approved specification and repository instructions;
+2. inspects only relevant code;
+3. implements the coherent bundle;
+4. runs targeted tests and debugging;
+5. returns one completion report.
 
-1. **Orient:** Sol reads repository policy, documentation, status, and the
-   relevant implementation surface.
-2. **Specify:** Sol writes a structured plan with boundaries, interfaces,
-   acceptance criteria, validation commands, and risks.
-3. **Validate:** The deterministic plan validator rejects missing or
-   contradictory execution fields before delegation.
-4. **Route:** Sol selects an available model likely to clear the task's quality
-   floor with the lowest expected total effort, recording uncertainty.
-5. **Implement:** A worker changes only its declared write set and reports
-   changed paths, commands, results, unresolved risks, and deviations.
-6. **Review:** Sol independently inspects every actual diff and evidence first
-   for specification compliance, then for quality, security, maintainability,
-   and regressions.
-7. **Correct:** Sol may send at most two consolidated correction briefs to a
-   worker after the initial attempt. If the outcome remains unresolved, stop
-   and report findings; replanning the same outcome does not reset the limit.
-8. **Integrate:** Sol runs repository-level validation and resolves interaction
-   failures between otherwise valid task bundles.
-9. **Continue:** Sol updates a checkpoint when work will span sessions or
-   contexts, then reports the verified outcome.
+No in-Codex planner/reviewer planning/review loop is required unless explicitly requested.
 
-For visual product work, build one representative production-quality screen
-before scaling the visual direction. Sol confirms that direction first; ask
-the user only when the target repository requires user approval. Evaluate
-visual acceptance independently from structural validation: appearance,
-hierarchy, and interaction are not established by tests alone, while visual
-approval does not replace behavior, accessibility, or test checks.
+### In-Codex thin-root orchestration
 
-Keep worker briefs compact: state the bounded goal, exact write set, constraints,
-acceptance, and return evidence, then link to authoritative repository
-documents instead of copying them into the prompt. Record whether the initial
-worker attempt met acceptance, the number of correction cycles, and usage only
-when the host reports it; otherwise usage is unknown.
+Use this when the feature still needs planning inside Codex.
 
-## 5. Concurrency And Write Ownership
+1. **Orient:** the planner reads only enough repository context to settle architecture and contracts.
+2. **Specify:** the planner creates a concise implementation contract.
+3. **Dispatch:** one coherent bundle goes to GPT-6 Luna.
+4. **Wait:** Luna owns implementation, tests, debugging, and routine verification without polling.
+5. **Review:** the reviewer inspects the completed diff once using specification and engineering-quality lenses.
+6. **Correct if needed:** send one consolidated correction request to the same worker.
+7. **Integrate:** perform broader checks only at real integration boundaries.
 
-- One active writer owns a path at a time.
-- Parallel tasks must have disjoint write sets and independently testable
-  contracts.
-- Shared contracts are defined before parallel implementation starts.
-- Sol remains the integration owner and never delegates final acceptance.
-- A worker must stop and report when a required change falls outside its write
-  set or invalidates a plan assumption.
+A second correction cycle is reserved for concrete high-assurance risk.
 
-## 6. Components
+## Efficiency model
 
-### Codex Skill
+The workflow reduces root activity by avoiding:
 
-`skill/gpt-development-orchestrator/` contains the discoverable workflow,
-focused references, templates, and UI metadata. It requires orchestration for
-all implementation tasks, including small tasks.
+- per-task model ranking and cost analysis;
+- repeated repository discovery by both root and worker;
+- tiny worker tasks for each file or function;
+- progress polling;
+- separate root calls for specification and engineering review;
+- ritual reruns of the worker's full validation;
+- checkpoints after every turn.
 
-### Plan Contract
+The normal delegated shape is one planning batch, one dispatch, one wait, one batched review, and one final response.
 
-`schemas/plan.schema.json` defines the machine-readable task plan. The schema
-captures task identity, readiness, dependencies, session model assignment,
-optional routing evidence, write set, acceptance criteria, validation, and risk.
-`tools/validate_plan.py` performs
-schema-independent standard-library validation so installation has no runtime
-package dependency.
+## Worker model
 
-### Safe Installer
+GPT-6 Luna is the default implementation worker. Installation creates a dedicated native `gpt_luna_builder` role pinned to `gpt-6-luna` with medium reasoning effort. The package does not change the global default subagent model and no longer tries to determine a globally optimal model for each task.
 
-`install.py` previews changes by default. `--apply` installs the versioned skill
-and, when requested, a marked global policy block. Mutations are atomic,
-backed up, and recorded in an undo receipt. The installer never reads secrets
-or edits authentication state.
+If Luna is unavailable, report the blocker rather than silently falling back.
 
-### Doctor
+The external-spec path can run directly in a Luna root session. The in-Codex path requires native delegation from the planner/reviewer to Luna.
 
-The doctor checks Python, source package integrity, installed skill integrity,
-the exact installed global policy against its source, configuration, and
-validator behavior. Missing or stale owned policy fails strict-workflow
-diagnostics. It reports actionable failures and does not mutate the environment.
+## Bundling and ownership
 
-The global instruction and skill are strong process guidance, not technical
-hard enforcement across all hosts or sessions. A host-level gate that verifies
-invocation identity and blocks implementation until the required Sol plan,
-worker invocation, and independent Sol review exist is required for a
-technical guarantee.
+One worker owns one coherent vertical bundle. A bundle may span entity, DTO, service, controller, UI, migrations, and tests when those changes belong to the same stable contract.
 
-## 7. Safety Boundaries
+Use multiple workers only when work is genuinely independent, write sets are disjoint, and separate workspaces are verified.
 
-The orchestrator does not imply permission to:
+## Planning artifacts
 
-- commit, push, merge, publish, or deploy;
-- create or rotate credentials;
-- mutate production data or infrastructure;
-- bypass repository policies or user approval requirements;
-- expose secrets to workers or logs;
-- let a worker broaden its own assignment.
+Markdown is the normal lightweight format. The existing JSON plan schema and validator remain available for projects that need a machine-readable contract; they are optional and should not become mandatory paperwork.
 
-External effects still require the authorization that the host Codex session
-and target project require.
+## Installation
 
-## 8. Portability
+The existing installer remains preview-first and reversible:
 
-The implementation uses Python 3.11+ and the standard library, with explicit
-Windows, macOS, and Linux path handling. The repository stores no machine-
-specific absolute paths. Installation destinations are derived from
-`CODEX_HOME`, then fall back to `~/.codex`.
+- skill installation is atomic;
+- global `AGENTS.md` policy integration is opt-in;
+- existing content is preserved outside owned markers;
+- backups and receipts support guarded undo;
+- doctor is read-only.
 
-## 9. Non-Goals For Version 0.1
+## Safety boundaries
 
-- A hosted orchestration service or web dashboard.
-- A separate model API gateway or billing layer.
-- Custom agent TOML files whose host schema has not been verified.
-- Autonomous background execution.
-- Product-specific executive approval workflows.
-- Automated source-control or production operations.
+The workflow does not authorize:
+
+- commit, push, merge, or publication;
+- deployment or production mutation;
+- credential creation or rotation;
+- destructive migrations;
+- broadening the worker's approved scope.
+
+Repository policy and explicit user authorization remain authoritative.
+
+## Non-goals
+
+- A hosted orchestration service.
+- An external model router.
+- Automatic model benchmarking.
+- Continuous worker polling.
+- A mandatory workflow for trivial changes.
+- Autonomous source-control or production operations.
