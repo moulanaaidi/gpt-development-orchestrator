@@ -1,36 +1,25 @@
-# Sol Review
+# Batched independent review
 
-Sol independently reviews every implementation change, including small or apparently trivial changes. Inspect the actual diff and relevant surrounding code; do not accept a worker's summary as proof. Read-only questions and read-only reviews do not require an implementation worker. Run suitable checks when the environment permits and distinguish tests actually run from proposed tests. A non-Sol root must delegate final review to Sol and must not claim Sol identity.
+Worker completion means ready for review, not accepted.
 
-## Pass 1: Specification
+Review the actual diff and relevant evidence once using two lenses in the same pass.
 
-- Does the change meet the task outcome and acceptance criteria?
-- Did it stay inside the assigned write set and preserve agreed interfaces and repository policies?
-- Is there evidence for each important behavior, including failure paths where relevant?
+## Lens 1: specification compliance
 
-## Pass 2: Engineering quality
+- Does the implementation satisfy the approved objective and acceptance criteria?
+- Did it preserve agreed contracts and stay within scope?
+- Are important success and failure paths covered?
 
-- Check correctness, security/privacy, error handling, maintainability, portability, performance where material, and regression risk.
-- Inspect tests for meaningful behavior coverage, not merely matching implementation details.
-- Check interactions with other task bundles and the existing system.
+## Lens 2: engineering quality and risk
 
-## Outcome
+- Check correctness, maintainability, error handling, security and privacy, portability, performance where material, and regression risk.
+- Inspect tests for meaningful behavior coverage.
+- Check interactions with existing code and shared contracts.
 
-Accept only when both passes are satisfactory and required validation is complete. Otherwise, Sol issues one consolidated correction brief with findings, paths, and acceptance checks to the implementation worker, then re-reviews the diff. Route every implementation correction back to a worker; Sol does not directly edit implementation files. Allow at most two correction cycles after the initial attempt. If acceptance remains unmet, stop and report unresolved findings; replanning the same outcome does not reset the limit. Do not let workers approve their own work or silently waive unresolved risks.
+Do not routinely repeat the worker's complete repository discovery, full test suite, or visual QA when adequate evidence exists. Perform targeted independent checks when evidence is missing, a failure is plausible, or risk justifies it.
 
-For visual product work, review the first representative production-quality
-screen and approve its direction before asking workers to scale that direction.
-Seek user approval only when target-repository policy requires it. Visual
-acceptance (appearance, hierarchy, and interaction) is separate from
-structural validation (behavior, accessibility, and tests); neither substitutes
-for the other.
+If changes are required, send all concrete file-level findings in one consolidated correction request to the same worker. Default to one correction cycle.
 
-Report material gaps plainly. No automatic commit, push, merge, publish, deployment, credential mutation, or production operation is implied by review or acceptance.
+A second cycle is an exception for a concrete unresolved high-assurance issue involving architecture, authentication or authorization, payments, tenancy, secrets, destructive migrations, production behavior, or high-impact shared infrastructure.
 
-Review host-provided invocation identity evidence separately from self-reported
-worker receipts. A receipt alone cannot establish which model or agent ran.
-
-Record whether the initial worker attempt met acceptance and how many
-correction cycles were needed. Record usage only when reported by the host;
-otherwise mark it unknown. Use these observations cautiously for comparable
-future tasks.
+Workers never approve their own changes. Acceptance remains with the planner/reviewer or the user.
