@@ -1,33 +1,20 @@
-# <Task ID>: <reviewable deliverable>
+# <Task ID>: <deliverable>
 
 ## Goal
-<One coherent implementation outcome>
+<One observable outcome>
 
-## Approved contract
-<Reference the approved external spec or Sol-authored plan. Include only task-specific facts needed to execute safely.>
+## Contract
+Spec: `path/to/approved-spec.md`
+<Only task-specific deltas or assumptions not already in the spec>
 
-## Owned scope
-- `path/or/directory/**`
-
-Do not modify unrelated paths. Do not commit, push, merge, deploy, publish, change credentials, or mutate production systems.
-
-## Required behavior and constraints
-- <contract>
-- <compatibility/security constraint>
-- <important assumption; stop only if materially false>
+## Scope
+- Write: `path/**`
+- Do not modify unrelated paths.
 
 ## Acceptance
 - [ ] <observable result>
-- [ ] <focused test/check>
+- [ ] <focused check>
 
-## Worker responsibility
-Own relevant repository discovery, implementation, targeted testing, debugging, and routine verification within this scope. Do not ask the planner to choose ordinary implementation details already established by repository conventions.
+Own scoped discovery, implementation, focused tests, debugging, and verification. Use repository conventions for ordinary decisions. Stop only for a material contract conflict.
 
-## Completion report
-Return once with:
-- status;
-- changed paths and behavior;
-- commands actually run and salient results;
-- deviations and why;
-- unresolved risks/test gaps;
-- decisions genuinely requiring the planner or user.
+Return one concise report with status, changed paths/behavior, checks run, deviations, unresolved risks/test gaps, and genuine blockers. Do not repeat the spec, paste code, or dump full logs.

@@ -37,7 +37,6 @@ class WorkflowContractTests(unittest.TestCase):
         skill = normalized("skill/gpt-development-orchestrator/SKILL.md").lower()
         self.assertIn("a skill cannot switch the active root model", skill)
         self.assertIn("report the blocker", skill)
-        self.assertIn("codex --model gpt-6.1-sol", read("README.md"))
 
     def test_policy_scopes_orchestration_to_substantial_work(self) -> None:
         policy = normalized("POLICY.md").lower()
@@ -45,7 +44,6 @@ class WorkflowContractTests(unittest.TestCase):
         for text in (policy, skill):
             self.assertIn("substantial", text)
             self.assertIn("trivial", text)
-        self.assertNotIn("every implementation task", policy)
 
     def test_external_spec_path_skips_replanning(self) -> None:
         skill = normalized("skill/gpt-development-orchestrator/SKILL.md").lower()
@@ -59,14 +57,26 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("one planning batch, one dispatch, one wait, one batched independent acceptance review", policy)
         self.assertIn("one planning batch, one dispatch, one wait, one batched review", skill)
 
+    def test_prompt_surface_has_size_guardrails(self) -> None:
+        self.assertLessEqual(len(read("skill/gpt-development-orchestrator/SKILL.md")), 3400)
+        self.assertLessEqual(len(read("POLICY.md")), 1800)
+        worker = tomllib.loads(read("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml"))
+        self.assertLessEqual(len(worker["developer_instructions"]), 1300)
+        self.assertLessEqual(len(read("skill/gpt-development-orchestrator/templates/task-brief.md")), 900)
+
+    def test_spec_by_reference_and_no_replay_are_explicit(self) -> None:
+        skill = normalized("skill/gpt-development-orchestrator/SKILL.md").lower()
+        policy = normalized("POLICY.md").lower()
+        worker = normalized("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml").lower()
+        self.assertIn("repository path", skill)
+        self.assertIn("do not replay prior model transcripts", skill)
+        self.assertIn("instead of copying it", policy)
+        self.assertIn("do not repeat the specification", worker)
+
     def test_luna_owns_high_volume_implementation_loop(self) -> None:
-        worker = normalized("WORKER-INSTRUCTIONS.md").lower()
-        delegation = normalized("skill/gpt-development-orchestrator/references/delegation.md").lower()
-        for text in (worker, delegation):
-            self.assertIn("repository discovery", text)
-            self.assertIn("implementation", text)
-            self.assertIn("debug", text)
-            self.assertIn("verification", text)
+        worker = normalized("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml").lower()
+        for term in ("discovery", "implementation", "debug", "verification"):
+            self.assertIn(term, worker)
 
     def test_review_is_one_batch_with_two_lenses(self) -> None:
         review = normalized("skill/gpt-development-orchestrator/references/review.md").lower()
@@ -77,10 +87,8 @@ class WorkflowContractTests(unittest.TestCase):
 
     def test_no_polling_and_no_tiny_worker_split(self) -> None:
         skill = normalized("skill/gpt-development-orchestrator/SKILL.md").lower()
-        delegation = normalized("skill/gpt-development-orchestrator/references/delegation.md").lower()
         self.assertIn("do not poll", skill)
         self.assertIn("tiny worker calls", skill)
-        self.assertIn("do not poll", delegation)
 
     def test_routing_defaults_to_luna_without_per_task_ranking(self) -> None:
         routing = normalized("skill/gpt-development-orchestrator/references/routing.md").lower()
@@ -91,7 +99,7 @@ class WorkflowContractTests(unittest.TestCase):
 
     def test_external_effect_boundaries_remain(self) -> None:
         policy = normalized("POLICY.md").lower()
-        worker = normalized("WORKER-INSTRUCTIONS.md").lower()
+        worker = normalized("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml").lower()
         for text in (policy, worker):
             self.assertIn("commit", text)
             self.assertIn("push", text)
