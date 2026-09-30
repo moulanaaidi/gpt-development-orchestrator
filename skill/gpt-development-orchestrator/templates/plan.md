@@ -1,36 +1,22 @@
 # Work Plan: <title>
 
 ## Outcome
-<Observable result and why it is needed>
+<Observable result>
 
-## Scope
-- In scope:
-- Out of scope:
+## Authority and scope
+- Existing rules/specs: `<path>#<section>`
+- Write scope: `<path/**>`
+- Out of scope: <...>
 
-## Contracts and constraints
-- Existing repository rules / authoritative paths:
-- Interfaces, invariants, API/data contracts:
-- Material security or production constraints:
-- Assumptions that would block implementation if false:
+## Contracts
+- <interfaces/invariants/security or failure behavior that must not be inferred>
 
 ## Implementation bundle
 - Worker: GPT-6 Luna
-- Owned write scope:
-- Dependencies already settled:
-- Acceptance criteria:
-- Focused validation commands:
+- Acceptance: <observable criteria>
+- Validation: `<focused command>`
 
-Keep this as one coherent vertical bundle unless a genuine dependency boundary requires another phase.
+Use one coherent vertical bundle unless a real dependency boundary requires another.
 
 ## Review
-One batched Sol review uses two lenses:
-1. specification compliance;
-2. engineering quality/security.
-
-Default correction budget: one consolidated correction cycle.
-
-## Completion
-- [ ] Acceptance criteria met
-- [ ] Worker validation recorded
-- [ ] Actual diff reviewed once
-- [ ] Remaining risks reported
+One delta-first Sol review: specification compliance + engineering quality/security. One consolidated correction cycle by default.
