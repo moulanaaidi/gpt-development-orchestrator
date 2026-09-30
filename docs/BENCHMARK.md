@@ -113,12 +113,66 @@ Benchmark #1 is retained as useful evidence of **root-workload reduction** and a
 a regression case for the acceptance-review contract. It is excluded from any
 equal-quality aggregate efficiency claim.
 
+## Forced-delegation diagnostic — Benchmark #2
+
+Benchmark #2 was run on 2026-09-30 against this repository from baseline
+`bc45196a906aebc00fbe816a58dea95fbd4f8919`. The installed orchestrator source
+was `5dd287475feed7befa6c75f58ef155fc99ac3e7a`.
+
+The task added a stable JSON output mode to `tools/validate_plan.py` while
+preserving the existing text CLI. Both treatments used GPT-6 Sol, medium
+reasoning. The delegated treatment used the configured GPT-6 Luna, medium worker.
+
+| Metric | Direct | Forced delegated | Change |
+| --- | ---: | ---: | ---: |
+| Root input tokens | 335,785 | 242,653 | **-27.7%** |
+| Root cached input | 305,024 | 192,768 | — |
+| Root output tokens | 4,152 | 2,504 | — |
+| Root reasoning output | 838 | 571 | — |
+| Worker input tokens | N/A | 463,233 | — |
+| Worker cached input | N/A | 425,216 | — |
+| Worker output tokens | N/A | 3,847 | — |
+| Worker reasoning output | N/A | 452 | — |
+| Aggregate input tokens | 335,785 | 705,886 | **+110.2%** |
+| Aggregate reported tokens | 339,937 | 712,237 | **+109.5%** |
+| Independent acceptance | PASS | **FAIL** | not comparable |
+
+The delegated candidate normalized the plan argument through `Path`, so on
+Windows the JSON `plan` value changed separators instead of preserving the exact
+argument string required by criterion 1. The direct candidate preserved the
+literal argument and passed independent acceptance.
+
+This benchmark is classified as a **forced-delegation diagnostic**, not a policy
+benchmark. The task already had an approved, bounded specification and a suitable
+active implementation model. The orchestrator's documented external-spec fast
+path would normally choose direct implementation for that shape. The benchmark
+prompt intentionally forced Sol -> worker -> Sol to measure delegation overhead,
+so its +110.2% aggregate input result must not be presented as the overhead of the
+normal routing policy.
+
+The result is still useful: it demonstrates that delegation can be a net loss on
+bounded work and that reducing root tokens alone is not an efficiency objective.
+It also adds an acceptance-review regression case for exact literal/round-trip
+requirements.
+
 ## Runtime benchmark protocol
 
 A runtime claim should be published only after comparable real tasks have been
-captured. For each benchmark pair, hold the task, repository baseline, acceptance
-criteria, planner/reviewer model and effort, worker model and effort, and host
-configuration as constant as practical.
+captured.
+
+Separate two experiment types:
+
+1. **Policy benchmark:** compare direct development with the orchestrator allowed
+   to apply its real routing policy. If an approved bounded spec should take the
+   direct fast path, that is a valid orchestrator outcome; do not force a worker
+   merely to create a delegated treatment.
+2. **Forced-delegation diagnostic:** deliberately require planner -> worker ->
+   reviewer to measure delegation overhead or worker behavior. Report this as a
+   diagnostic and do not generalize it to the normal policy.
+
+For each benchmark pair, hold the task, repository baseline, acceptance criteria,
+root model and effort, host configuration, and validation requirements constant
+as practical. When delegation occurs, also record the worker model and effort.
 
 Capture from actual session/provider usage records:
 
@@ -152,7 +206,10 @@ zero and do not estimate savings from task duration or number of files alone.
   clearly disclosing the task-mix difference.
 - Count failed/corrective runs in the workflow that caused them.
 - Report unmeasured fields as unknown.
-- Treat worker usage as required for aggregate orchestrated token/cost claims.
+- Treat worker usage as required for aggregate delegated token/cost claims.
+- Label policy benchmarks and forced-delegation diagnostics separately.
+- Do not force delegation for an approved bounded spec when the routing policy
+  would normally implement it directly.
 - Require both candidates to pass the same independent acceptance gate before
   including the pair in an equal-quality efficiency aggregate.
 - Preserve implementation-session validation summaries so an independent
@@ -165,13 +222,19 @@ zero and do not estimate savings from task duration or number of files alone.
 
 **Measured:** static core context surface, 9,917 -> 7,025 characters (-29.2%).
 
-**Preliminary runtime evidence:** one controlled task measured a 68.4% reduction
-in root input tokens, but worker usage was unavailable and the orchestrated
-candidate failed independent correctness acceptance. This is root-workload
-evidence, not an overall efficiency claim.
+**Preliminary runtime evidence:** Benchmark #1 measured a 68.4% reduction in root
+input tokens, but worker usage was unavailable and the orchestrated candidate
+failed independent correctness acceptance. This is root-workload evidence, not
+an overall efficiency claim.
+
+**Forced-delegation evidence:** Benchmark #2 reduced root input by 27.7% but
+increased aggregate input by 110.2%, increased aggregate reported tokens by
+109.5%, and failed independent acceptance. Because the task qualified for the
+documented direct external-spec path, this diagnoses delegation overhead rather
+than the normal routing policy.
 
 **Not yet established:** equal-quality total-token, allowance, or monetary
-savings for v0.3 versus direct development.
+savings for the orchestrator's real routing policy versus direct development.
 
 Use `tools/summarize_runtime_benchmark.py` to aggregate root/worker usage without
 turning missing telemetry into zero. Example:

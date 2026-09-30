@@ -19,6 +19,15 @@ cite the concrete diff/test evidence. Final acceptance requires every material
 criterion to be supported and pass. Do not infer acceptance from a successful
 test command or from the worker's completion report.
 
+## Exact-value and round-trip contracts
+
+When a criterion requires preserving an exact caller-supplied value—such as a
+path, identifier, URL, header, serialized field, or command argument—inspect the
+representation boundary for normalization, coercion, canonicalization, or
+platform-specific rewriting. Check the literal value required by the
+specification, not only a semantically equivalent value constructed by the
+implementation or its tests.
+
 ## Lens 1: specification compliance
 
 - Does the implementation satisfy the approved objective and acceptance criteria?
