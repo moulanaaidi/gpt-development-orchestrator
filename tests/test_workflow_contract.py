@@ -17,18 +17,27 @@ def normalized(relative_path: str) -> str:
 
 
 class WorkflowContractTests(unittest.TestCase):
-    def test_requested_model_pair_is_consistent(self) -> None:
-        for path in (
+    def test_planner_reviewer_is_model_agnostic(self) -> None:
+        paths = (
             "README.md",
             "POLICY.md",
             "docs/ARCHITECTURE.md",
+            "docs/DECISIONS.md",
             "skill/gpt-development-orchestrator/SKILL.md",
             "skill/gpt-development-orchestrator/references/routing.md",
-        ):
+            "skill/gpt-development-orchestrator/agents/openai.yaml",
+        )
+        for path in paths:
             with self.subTest(path=path):
                 text = read(path)
-                self.assertIn("gpt-6.1-sol", text)
-                self.assertIn("GPT-6 Luna", text)
+                self.assertNotRegex(text, r"(?i)\bgpt-6\.1-sol\b|\bsol-class\b|\bsol\b")
+
+        routing = normalized("skill/gpt-development-orchestrator/references/routing.md").lower()
+        self.assertIn("best suitable available model", routing)
+        self.assertIn("explicit user model choice", routing)
+        self.assertIn("do not hard-code", routing)
+
+    def test_bundled_worker_role_is_consistent(self) -> None:
         worker = tomllib.loads(read("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml"))
         self.assertEqual(worker["model"], "gpt-6-luna")
         self.assertEqual(worker["model_reasoning_effort"], "medium")
@@ -36,7 +45,7 @@ class WorkflowContractTests(unittest.TestCase):
     def test_root_selection_does_not_claim_automatic_switching(self) -> None:
         skill = normalized("skill/gpt-development-orchestrator/SKILL.md").lower()
         self.assertIn("a skill cannot switch the active root model", skill)
-        self.assertIn("report the blocker", skill)
+        self.assertIn("capable planner/reviewer must be selected", skill)
 
     def test_policy_scopes_orchestration_to_substantial_work(self) -> None:
         policy = normalized("POLICY.md").lower()
@@ -49,7 +58,7 @@ class WorkflowContractTests(unittest.TestCase):
         skill = normalized("skill/gpt-development-orchestrator/SKILL.md").lower()
         self.assertIn("approved external specification", skill)
         self.assertIn("implement directly without recreating the plan", skill)
-        self.assertIn("do not add an in-codex planning or review loop", skill)
+        self.assertIn("do not add an in-session planning or review loop", skill)
 
     def test_thin_root_shape_is_documented(self) -> None:
         policy = normalized("POLICY.md").lower()
@@ -58,8 +67,8 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("one planning batch, one dispatch, one wait, one batched review", skill)
 
     def test_prompt_surface_has_size_guardrails(self) -> None:
-        self.assertLessEqual(len(read("skill/gpt-development-orchestrator/SKILL.md")), 3400)
-        self.assertLessEqual(len(read("POLICY.md")), 1800)
+        self.assertLessEqual(len(read("skill/gpt-development-orchestrator/SKILL.md")), 3800)
+        self.assertLessEqual(len(read("POLICY.md")), 1900)
         worker = tomllib.loads(read("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml"))
         self.assertLessEqual(len(worker["developer_instructions"]), 1300)
         self.assertLessEqual(len(read("skill/gpt-development-orchestrator/templates/task-brief.md")), 900)
@@ -73,7 +82,7 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("instead of copying it", policy)
         self.assertIn("do not repeat the specification", worker)
 
-    def test_luna_owns_high_volume_implementation_loop(self) -> None:
+    def test_worker_owns_high_volume_implementation_loop(self) -> None:
         worker = normalized("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml").lower()
         for term in ("discovery", "implementation", "debug", "verification"):
             self.assertIn(term, worker)
@@ -90,12 +99,11 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("do not poll", skill)
         self.assertIn("tiny worker calls", skill)
 
-    def test_routing_defaults_to_luna_without_per_task_ranking(self) -> None:
+    def test_routing_avoids_per_task_benchmarking(self) -> None:
         routing = normalized("skill/gpt-development-orchestrator/references/routing.md").lower()
-        self.assertIn("gpt_luna_builder", routing)
-        self.assertIn("gpt-6 luna", routing)
         self.assertIn("do not perform a fresh model ranking", routing)
-        self.assertIn("do not silently substitute another model", routing)
+        self.assertIn("do not silently substitute models", routing)
+        self.assertIn("re-evaluate routing only when", routing)
 
     def test_external_effect_boundaries_remain(self) -> None:
         policy = normalized("POLICY.md").lower()

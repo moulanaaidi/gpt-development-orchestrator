@@ -14,7 +14,7 @@
 - Assumptions that would block implementation if false:
 
 ## Implementation bundle
-- Worker: GPT-6 Luna
+- Worker: <configured worker role>
 - Owned write scope:
 - Dependencies already settled:
 - Acceptance criteria:
@@ -23,7 +23,7 @@
 Keep this as one coherent vertical bundle unless a genuine dependency boundary requires another phase.
 
 ## Review
-One batched Sol review uses two lenses:
+One batched planner/reviewer pass uses two lenses:
 1. specification compliance;
 2. engineering quality/security.
 

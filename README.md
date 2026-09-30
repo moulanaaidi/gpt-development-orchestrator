@@ -2,18 +2,18 @@
 
 A token-efficient development workflow for Codex.
 
-**Sol 6.1 plans/reviews. Luna 6 builds.**
+**A capable planner/reviewer plans once. A configured worker builds. The planner/reviewer accepts once.**
 
-| Role | Model | Reasoning |
-| --- | --- | --- |
-| Planner / reviewer | `gpt-6.1-sol` | Host/session setting |
-| Implementation worker | `gpt-6-luna` | Medium |
+| Role | Model policy |
+| --- | --- |
+| Planner / reviewer | Best suitable available model for task, risk, and budget; explicit user/project choice wins |
+| Implementation worker | Configured worker role; bundled default is `gpt_luna_builder` |
 
-The design keeps high-cost reasoning at the architecture and acceptance boundaries while GPT-6 Luna owns repository discovery, implementation, tests, debugging, and routine verification.
+The workflow keeps high-cost reasoning at architecture and acceptance boundaries while the implementation worker owns repository discovery, implementation, tests, debugging, and routine verification.
 
 ## v0.3 optimization target
 
-v0.2 reduced model turns. v0.3 also reduces **prompt/context duplication**.
+v0.2 reduced model turns. v0.3 also reduces **prompt/context duplication** and removes planner/reviewer model pinning.
 
 The default rules are:
 
@@ -23,20 +23,21 @@ The default rules are:
 - use one coherent worker bundle;
 - return concise completion evidence rather than code/log dumps;
 - review the actual diff once instead of rediscovering the repository;
-- keep checkpoints only for real cross-session continuity.
+- keep checkpoints only for real cross-session continuity;
+- never bake one planner/reviewer model name into the workflow.
 
 ### Lowest-token path
 
-For limited Codex allowance, do planning/review outside Codex and use Luna only for implementation:
+For limited implementation allowance, do planning/review outside the implementation session and use a suitable worker only for implementation:
 
 ```text
-ChatGPT planner/reviewer
+capable external planner/reviewer
         |
         v
 approved spec saved in repository
         |
         v
-VS Code + Codex GPT-6 Luna
+implementation session
         |
         +-- read spec by path
         +-- inspect only relevant code
@@ -44,10 +45,10 @@ VS Code + Codex GPT-6 Luna
         +-- concise completion report
         |
         v
-ChatGPT reviews spec + diff
+planner/reviewer checks spec + diff
 ```
 
-If the approved spec is already available to the Luna session, **you do not need to invoke the orchestration skill just to implement it**. Give Luna the spec path and implementation request directly. This avoids loading planning/review instructions into an implementation-only turn.
+If the approved spec is already available to a suitable implementation session, **you do not need to invoke the orchestration skill just to implement it**. Give the implementation model the spec path and request directly.
 
 Example:
 
@@ -60,9 +61,9 @@ Own implementation, focused tests, debugging, and verification.
 Return a concise completion report; do not repeat the spec or dump full logs.
 ```
 
-## In-Codex orchestration
+## Orchestrated path
 
-When the feature still needs planning inside Codex, select GPT-6.1 Sol and invoke:
+When the feature still needs planning in the active development session, select a capable planner/reviewer model appropriate to the task and invoke:
 
 ```text
 $gpt-development-orchestrator plan and execute this substantial feature.
@@ -71,18 +72,33 @@ $gpt-development-orchestrator plan and execute this substantial feature.
 The normal delegated shape is:
 
 ```text
-Sol  -> one compact contract
-Luna -> one coherent implementation bundle
-Sol  -> one batched diff review
-     -> optional one consolidated correction
+planner/reviewer -> one compact contract
+worker           -> one coherent implementation bundle
+planner/reviewer -> one batched diff review
+                  -> optional one consolidated correction
 ```
 
 Do not poll a healthy worker or split a vertical feature into tiny dispatches.
 
+## Model selection
+
+The skill intentionally does not name a mandatory planner/reviewer model.
+
+Selection precedence:
+
+1. explicit user choice;
+2. project-configured choice;
+3. capable model already selected by the host/session;
+4. if the active model is unsuitable, select another capable available model outside the skill.
+
+Avoid a fresh benchmark, pricing study, or full model-registry scan on every task. Re-evaluate only when requirements, available models, or the host materially change.
+
+The bundled implementation role is currently `gpt_luna_builder`, but that is a package default rather than an architectural requirement.
+
 ## What the package installs
 
 - the `gpt-development-orchestrator` skill;
-- a dedicated `gpt_luna_builder` role pinned to GPT-6 Luna medium;
+- a bundled `gpt_luna_builder` implementation role;
 - compact planning/delegation/review references and templates;
 - an optional global policy;
 - installer, doctor, guarded undo, and JSON plan validation utilities.

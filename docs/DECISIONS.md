@@ -6,23 +6,23 @@ The orchestrator contains no product-specific governance. Each target repository
 
 ## ADR-002: Thin-root orchestration
 
-**Decision:** For substantial in-Codex work, a Sol-class root establishes the contract once, GPT-6 Luna owns the coherent implementation loop, and Sol performs one batched acceptance review.
+**Decision:** For substantial orchestrated work, a capable planner/reviewer establishes the contract once, the configured worker owns the coherent implementation loop, and the planner/reviewer performs one batched acceptance review.
 
-**Reason:** Root-model tokens have the highest value on architecture, contracts, risk, and acceptance. Repository exploration, implementation, testing, and debugging are high-volume activities that should remain with the cheaper worker.
+**Reason:** Planner/reviewer tokens have the highest value on architecture, contracts, risk, and acceptance. Repository exploration, implementation, testing, and debugging are high-volume activities that should remain with the implementation worker.
 
-## ADR-003: External specifications may bypass in-Codex planning
+## ADR-003: External specifications may bypass in-session planning
 
-**Decision:** When the user provides an approved external specification and the active Codex session is GPT-6 Luna, the worker implements directly. It does not recreate the plan or require a Sol subagent.
+**Decision:** When the user provides an approved external specification and the active session is suitable for implementation, implement directly. Do not recreate the plan or require a planning subagent.
 
-**Reason:** This is the lowest-overhead path when ChatGPT already performed the expensive reasoning. Replanning inside Codex duplicates work and consumes the allowance the workflow is meant to preserve.
+**Reason:** This is the lowest-overhead path when the expensive reasoning has already happened. Replanning duplicates work and consumes the allowance the workflow is meant to preserve.
 
-## ADR-004: GPT-6 Luna is the default implementation worker
+## ADR-004: Bundled implementation worker is a default, not an architectural requirement
 
-**Decision:** Version 0.2 defaults to GPT-6 Luna rather than dynamically ranking workers for every task.
+**Decision:** The package currently installs `gpt_luna_builder` as its default worker role. Projects may configure another approved worker.
 
-**Reason:** Per-task model discovery, quality-floor scoring, cost comparisons, and routing paperwork add root activity. The user's workflow already separates planning/review from implementation, so a stable cheap-worker default is more efficient.
+**Reason:** A stable default avoids per-task worker-discovery overhead while keeping the architecture future-proof.
 
-If Luna is unavailable, the workflow reports the blocker instead of silently switching models.
+If the configured worker is unavailable, do not silently switch models unless a user/project-approved alternative exists.
 
 ## ADR-005: Coherent bundles instead of tiny tasks
 
@@ -32,11 +32,11 @@ If Luna is unavailable, the workflow reports the blocker instead of silently swi
 
 ## ADR-006: Worker owns routine discovery and debugging
 
-**Decision:** Within the approved scope, Luna may inspect neighboring code, follow existing conventions, implement, run focused tests, diagnose failures, and iterate until ready for review.
+**Decision:** Within the approved scope, the worker may inspect neighboring code, follow existing conventions, implement, run focused tests, diagnose failures, and iterate until ready for review.
 
-**Reason:** Sending routine implementation questions back to Sol makes the root thick again.
+**Reason:** Sending routine implementation questions back to the planner/reviewer makes the root thick again.
 
-## ADR-007: One batched Sol review
+## ADR-007: One batched planner/reviewer pass
 
 **Decision:** Specification compliance and engineering quality/security are two lenses in one acceptance pass.
 
@@ -46,7 +46,7 @@ If Luna is unavailable, the workflow reports the blocker instead of silently swi
 
 **Decision:** Normal work gets at most one consolidated correction request after the initial implementation. A second cycle is reserved for a concrete unresolved high-assurance issue.
 
-**Reason:** Correction loops are expensive because they reactivate both worker and root contexts.
+**Reason:** Correction loops are expensive because they reactivate both worker and planner/reviewer contexts.
 
 ## ADR-009: Trivial work bypasses orchestration
 
@@ -56,7 +56,7 @@ If Luna is unavailable, the workflow reports the blocker instead of silently swi
 
 ## ADR-010: No polling
 
-**Decision:** After dispatch, the root waits for completion instead of requesting routine progress updates or duplicating worker exploration.
+**Decision:** After dispatch, the planner/reviewer waits for completion instead of requesting routine progress updates or duplicating worker exploration.
 
 **Reason:** Polling adds token churn without improving the finished patch.
 
@@ -76,8 +76,10 @@ If Luna is unavailable, the workflow reports the blocker instead of silently swi
 
 The orchestrator does not authorize commits, pushes, merges, deployment, credential changes, destructive migrations, or production operations.
 
-## ADR-014: Explicit Sol 6.1 / Luna 6 assignments
+## ADR-014: Planner/reviewer selection is model-agnostic
 
-**Decision:** Use GPT-6.1 Sol (`gpt-6.1-sol`) for planning and final acceptance, and GPT-6 Luna (`gpt-6-luna`) at medium reasoning for implementation.
+**Decision:** Do not pin planning or final acceptance to a named model. Use the best suitable available model for task complexity, risk, and budget. Respect explicit user/project choices first, then the capable host/session selection.
 
-**Reason:** The user selected this model pairing. Retain the thin-root workflow, approved-external-spec shortcut and native Luna role. Select the root model through the host rather than changing global defaults or pretending that skill text can switch an active session. Do not silently replace either requested model.
+**Reason:** Model availability and relative capability change over time. Hard-coding a planner/reviewer makes the workflow stale and can force unnecessary cost or block a better model.
+
+The skill itself does not switch the active root model and should not run a full benchmark or model-registry exercise on every task.

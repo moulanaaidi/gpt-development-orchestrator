@@ -4,7 +4,7 @@ Planning exists to remove decisions from the implementation worker, not to dupli
 
 Reuse an approved specification or repository plan whenever one already settles the relevant product and architecture decisions. Do not create a competing plan just because this skill is active.
 
-For new substantial work, the Sol-class planner should establish only what the worker needs to execute safely:
+For new substantial work, the planner/reviewer should establish only what the worker needs to execute safely:
 
 - observable objective and non-goals;
 - relevant repository evidence and existing conventions;
@@ -16,6 +16,6 @@ For new substantial work, the Sol-class planner should establish only what the w
 
 Prefer vertical bundles that can be implemented and verified end to end. Do not divide work by every file, function, or five-minute step.
 
-A task is ready when GPT-6 Luna can discover the local implementation details, make routine coding choices from repository conventions, implement, test, and debug without inventing product or architecture decisions.
+A task is ready when the configured worker can discover local implementation details, make routine coding choices from repository conventions, implement, test, and debug without inventing product or architecture decisions.
 
 Keep plans concise. Link to authoritative repository documents instead of copying them.
