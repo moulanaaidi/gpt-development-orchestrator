@@ -1,33 +1,21 @@
-# <Task ID>: <reviewable deliverable>
+# <Task ID>: <deliverable>
 
 ## Goal
-<One coherent implementation outcome>
+<One observable implementation outcome>
 
-## Approved contract
-<Reference the approved external spec or Sol-authored plan. Include only task-specific facts needed to execute safely.>
+## Authority
+- Spec/plan: `<path>#<section>`
+- Repository rules: `<path>`
 
-## Owned scope
-- `path/or/directory/**`
+## Scope
+- Write: `<path/**>`
+- Preserve unrelated work. No commit/push/merge/deploy/production mutation.
 
-Do not modify unrelated paths. Do not commit, push, merge, deploy, publish, change credentials, or mutate production systems.
-
-## Required behavior and constraints
-- <contract>
-- <compatibility/security constraint>
-- <important assumption; stop only if materially false>
+## Contract
+- <Only task-specific facts not safely obtained from the authority above>
 
 ## Acceptance
-- [ ] <observable result>
-- [ ] <focused test/check>
+- [ ] <observable behavior>
+- [ ] `<focused validation command>`
 
-## Worker responsibility
-Own relevant repository discovery, implementation, targeted testing, debugging, and routine verification within this scope. Do not ask the planner to choose ordinary implementation details already established by repository conventions.
-
-## Completion report
-Return once with:
-- status;
-- changed paths and behavior;
-- commands actually run and salient results;
-- deviations and why;
-- unresolved risks/test gaps;
-- decisions genuinely requiring the planner or user.
+Own scoped discovery, implementation, targeted tests, debugging, and routine verification. Return one completion report (target <=250 words): status, changed paths/behavior, checks/results, deviations, risks/gaps, and genuine decisions needed.
