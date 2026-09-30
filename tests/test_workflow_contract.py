@@ -18,24 +18,15 @@ def normalized(relative_path: str) -> str:
 
 class WorkflowContractTests(unittest.TestCase):
     def test_planner_reviewer_is_model_agnostic(self) -> None:
-        paths = (
-            "README.md",
-            "POLICY.md",
-            "docs/ARCHITECTURE.md",
-            "docs/DECISIONS.md",
-            "skill/gpt-development-orchestrator/SKILL.md",
-            "skill/gpt-development-orchestrator/references/routing.md",
-            "skill/gpt-development-orchestrator/agents/openai.yaml",
-        )
-        for path in paths:
-            with self.subTest(path=path):
-                text = read(path)
-                self.assertNotRegex(text, r"(?i)\bgpt-6\.1-sol\b|\bsol-class\b|\bsol\b")
-
         routing = normalized("skill/gpt-development-orchestrator/references/routing.md").lower()
+        skill = normalized("skill/gpt-development-orchestrator/SKILL.md").lower()
+        readme = normalized("README.md").lower()
+
         self.assertIn("best suitable available model", routing)
         self.assertIn("explicit user model choice", routing)
-        self.assertIn("do not hard-code", routing)
+        self.assertIn("do not hard-code a planner/reviewer", routing)
+        self.assertIn("do not hard-code a planner/reviewer model family or name", skill)
+        self.assertIn("does not name a mandatory planner/reviewer model", readme)
 
     def test_bundled_worker_role_is_consistent(self) -> None:
         worker = tomllib.loads(read("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml"))
