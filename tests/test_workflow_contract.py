@@ -85,6 +85,18 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("engineering quality", review)
         self.assertIn("default to one correction cycle", review)
 
+    def test_compact_handoffs_and_delta_first_review(self) -> None:
+        delegation = normalized("skill/gpt-development-orchestrator/references/delegation.md").lower()
+        review = normalized("skill/gpt-development-orchestrator/references/review.md").lower()
+        continuity = normalized("skill/gpt-development-orchestrator/references/continuity.md").lower()
+        checkpoint = normalized("skill/gpt-development-orchestrator/templates/checkpoint.md").lower()
+
+        self.assertIn("500 words", delegation)
+        self.assertIn("delta-first review", review)
+        self.assertIn("changed-file names and diff statistics", review)
+        self.assertIn("300 words", continuity)
+        self.assertIn("target <=300 words", checkpoint)
+
     def test_no_polling_and_no_tiny_worker_split(self) -> None:
         skill = normalized("skill/gpt-development-orchestrator/SKILL.md").lower()
         self.assertIn("do not poll", skill)

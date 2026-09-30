@@ -1,35 +1,14 @@
 # Development Checkpoint
 
-## Objective and status
-<Outcome; current state>
+- Objective / current status:
+- Authority: `path#section`
+- Decisions or assumptions still in force:
+- Completed + verified evidence:
+- Active owner / write scope:
+- Pending dependencies / blockers:
+- Checks run / known gaps:
+- Correction count / host-reported usage (or `unknown`):
+- Next concrete action:
+- Authorization boundary still required:
 
-## Decisions and assumptions
-- <Decision or assumption, with a link to its source when available>
-
-## Completed and verified
-- <Change and evidence; distinguish verified from reported>
-
-## Active work
-- Task / owner / actual host model:
-- Write set:
-- State / blocker:
-
-## Remaining work
-- <Task, dependency, and status>
-
-## Validation
-- Run:
-- Result:
-- Not run / known gaps:
-
-## Routing feedback
-- Host-advertised model and task type (omit if unavailable):
-- Initial attempt met acceptance (yes/no/unknown):
-- Correction cycles used (0-2) and extra review needed:
-- Usage reported by host (or `unknown`):
-
-## Next action
-<One concrete action>
-
-## Boundaries
-<Relevant approvals or authorization still required. Never include secrets.>
+Target <=300 words. Reference authoritative repository artifacts by path instead of copying them. Never include secrets, tokens, credentials, transcripts, or full logs.

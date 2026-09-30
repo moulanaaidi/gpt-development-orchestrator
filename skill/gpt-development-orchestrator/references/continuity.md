@@ -1,6 +1,6 @@
 # Continuity
 
-For work likely to outlive the current session, keep one concise checkpoint in the target repository's agreed location. Update it after a meaningful plan, implementation, or review milestone, and before handing work to another model or session.
+For work likely to outlive the current session, keep one concise checkpoint in the target repository's agreed location. Update it after a meaningful plan, implementation, or review milestone, and before handing work to another model or session. Target 300 words or fewer; prefer paths and deltas over copied history.
 
 Record:
 

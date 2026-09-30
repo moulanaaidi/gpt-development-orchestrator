@@ -4,6 +4,13 @@ Worker completion means ready for review, not accepted.
 
 Review the actual diff and relevant evidence once using two lenses in the same pass.
 
+## Delta-first review
+
+1. Start with changed-file names and diff statistics.
+2. Read the relevant diff hunks against the approved contract and worker evidence.
+3. Open full changed files, neighboring code, or broader tests only when a concrete dependency, regression path, security concern, or missing evidence justifies it.
+4. Avoid repository-wide rediscovery when the worker evidence and diff already establish the necessary context.
+
 ## Lens 1: specification compliance
 
 - Does the implementation satisfy the approved objective and acceptance criteria?

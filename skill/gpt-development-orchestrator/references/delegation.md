@@ -2,7 +2,7 @@
 
 Delegate a coherent implementation outcome, not a sequence of tiny coding steps.
 
-One GPT-6 Luna worker should normally own the full in-scope loop: relevant repository discovery, implementation, focused tests, debugging, and routine verification.
+One configured implementation worker should normally own the full in-scope loop: relevant repository discovery, implementation, focused tests, debugging, and routine verification. Preserve unrelated user changes and inspect only the repository area required by the approved bundle.
 
 ## Worker brief
 
@@ -16,7 +16,7 @@ A useful brief contains:
 - focused validation commands;
 - concise completion-report requirements.
 
-Do not reproduce large architecture or policy documents when a path or link is enough.
+Do not reproduce large architecture or policy documents when a path or link is enough. Target at most 500 words for a normal worker handoff, excluding paths and commands; exceed that only when the contract genuinely cannot be expressed safely within the limit.
 
 Avoid splitting one vertical feature into separate workers for DTOs, entities, services, controllers, UI, and tests unless those pieces are genuinely independent. Each additional dispatch creates context and coordination overhead.
 
