@@ -8,6 +8,7 @@
 - Make direct implementation the preferred path when an approved specification already exists.
 - Add spec-by-reference guidance to avoid repeatedly pasting large workpacks into worker/reviewer prompts.
 - Add transcript, repository-discovery, test-log, checkpoint, and completion-report token discipline.
+- Absorb the safe token-efficiency ideas from the earlier WIP branch: <=500-word worker handoffs, delta-first review, and <=300-word checkpoints, without restoring its obsolete fixed-planner routing.
 - Add prompt-size regression tests so the core skill, global policy, worker instructions, and task brief do not silently grow without review.
 - Add a reproducible context-efficiency benchmark and runtime measurement protocol; current core hot-path surface is 29.2% smaller than the pre-v0.3 baseline.
 - Remove the fixed planner/reviewer model assignment. The planner/reviewer is now selected from the best suitable available model for the task, risk, and budget, respecting explicit user/project choices.
