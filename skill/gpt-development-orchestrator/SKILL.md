@@ -1,59 +1,58 @@
 ---
 name: gpt-development-orchestrator
-description: Thin-root development workflow for substantial multi-file work. Reuse an approved external specification when one exists; otherwise let a GPT-6.1 Sol planner/reviewer root define the contract once, then give one coherent implementation bundle to GPT-6 Luna and review the completed patch once. Skip trivial edits and explicitly single-agent tasks.
+description: Token-efficient thin-root workflow for substantial multi-file work. Reuse approved specifications, send one compact implementation bundle to GPT-6 Luna, and review only the resulting delta. Skip trivial work and avoid repeated context.
 metadata:
-  short-description: Planner plans once, Luna builds, Reviewer accepts once
+  short-description: Plan once, build once, review the delta once
 ---
 
-# Planner decides. Luna builds. Reviewer accepts.
+# Thin-root development orchestration
 
-Use this skill for substantial multi-file features, migrations, refactors, or builds. Do not force it onto trivial edits, read-only questions, or explicitly single-agent tasks.
+Use this skill only for substantial multi-file features, migrations, refactors, or builds. Trivial edits, read-only questions, and explicitly single-agent tasks bypass it.
 
-The goal is to minimize expensive root-model activity while preserving strong planning and independent acceptance.
+## Roles
 
-## Model assignments
+- Planner/final reviewer: GPT-6.1 Sol (`gpt-6.1-sol`).
+- Implementation worker: `gpt_luna_builder`, pinned to GPT-6 Luna (`gpt-6-luna`) at medium reasoning.
 
-- Planner and final reviewer: GPT-6.1 Sol (`gpt-6.1-sol`).
-- Implementation worker: GPT-6 Luna (`gpt-6-luna`) with medium reasoning, through `gpt_luna_builder`.
+A skill cannot switch the active root model. Never silently substitute another model.
 
-For the in-Codex path, select GPT-6.1 Sol for the root session before planning. A skill cannot switch the active root model. If that model is unavailable, report the blocker rather than silently substituting another planner/reviewer. Preserve an approved external specification without regenerating it merely because it came from another model.
+## Route
 
-## Choose the path
+### Approved external specification
 
-### A. Approved external specification
+An approved external specification is already the plan. Never run another planning pass merely because this skill is active.
 
-If the user provides an approved implementation specification from ChatGPT or another trusted planning step:
+- If the active session is GPT-6 Luna, implement directly.
+- If a non-Luna root has native access to `gpt_luna_builder`, dispatch exactly one implementation bundle without replanning. Do not add an in-Codex review unless the user requested it.
+- If minimizing Codex allowance is the priority, prefer opening the approved specification directly in a GPT-6 Luna session instead of first loading it into a Sol root.
+- When the specification is available in the shared workspace, pass its path and relevant section/anchor plus a compact task capsule; do not copy the whole document into the worker prompt.
+- If only part of a large specification applies, send only that authoritative slice.
 
-1. Treat that specification as authoritative.
-2. If the active Codex session is already GPT-6 Luna, implement directly without recreating the plan.
-3. Inspect only the repository areas needed to satisfy the specification.
-4. Own implementation, focused testing, debugging, and routine verification in one coherent run.
-5. Return one concise completion report.
+### In-Codex planning
 
-Do not add an in-Codex planning or review loop unless the user asks for it.
+When no approved contract exists:
 
-### B. In-Codex thin-root orchestration
+1. GPT-6.1 Sol inspects only enough repository evidence to settle product/architecture decisions and acceptance.
+2. Produce one concise contract and normally one vertical implementation bundle. Read `references/planning.md` only when needed.
+3. Dispatch once to `gpt_luna_builder`. Luna owns scoped discovery, implementation, focused tests, debugging, and routine verification. Read `references/delegation.md` only when needed.
+4. Wait without polling or overlapping repository exploration.
+5. Review the changed delta once using specification-compliance and engineering-quality/security lenses. Read `references/review.md` only when needed.
+6. Send all required corrections in one findings-only request to the same worker. A second cycle is only for a concrete unresolved high-assurance risk.
 
-If the task still needs planning inside Codex:
+## Context discipline
 
-1. The GPT-6.1 Sol planner/reviewer root establishes the objective, boundaries, contracts, acceptance criteria, material risks, and a dependency-ordered implementation bundle. Reuse any existing approved design instead of writing a competing one. Read references/planning.md only when planning detail is needed.
-2. Route the implementation bundle through the installed native `gpt_luna_builder` role, pinned to GPT-6 Luna. Do not perform dynamic per-task model ranking or cost analysis. Read references/routing.md only when routing must be verified.
-3. Give Luna one coherent end-to-end bundle. Let it own in-scope repository discovery, implementation, tests, debugging, and routine verification. Do not poll a healthy worker or duplicate its repository work. Read references/delegation.md when preparing the brief.
-4. After Luna completes, GPT-6.1 Sol checks the actual diff and evidence once using two lenses in one batch: specification compliance and engineering quality/security. Read references/review.md when performing acceptance.
-5. If corrections are needed, send all concrete findings to the same worker in one request. Default to one correction cycle. Expand only for a concrete high-assurance risk.
-6. Run cross-task validation only at genuine integration boundaries and update continuity state only when work will span sessions.
+- Prefer targeted search, file ranges, changed-file lists, and diff hunks over recursive repository inventories or full-file/full-document reads.
+- Reuse paths, anchors, and approved artifacts instead of paraphrasing or repasting them.
+- Target a worker handoff of at most 500 words, excluding paths and validation commands. Expand only when a contract cannot safely be referenced.
+- Successful test evidence is command + result summary; do not paste routine logs.
+- Worker completion reports should stay at or below 250 words unless blocked or a material risk needs explanation.
+- Review starts from changed-file names/statistics and relevant hunks; open full files or neighboring code only for a concrete dependency or risk.
+- Correction requests contain only new findings/deltas. Do not resend unchanged specification text.
+- Do not repeat repository discovery, full validation, model checks, or unchanged instructions without a concrete reason.
+- Update continuity state only for cross-session work.
 
-## Efficiency rules
+## Normal shape
 
-- One planning batch, one dispatch, one wait, one batched review, one final response is the normal shape.
-- Do not split a coherent feature into tiny worker calls for progress visibility.
-- Do not poll workers or ask for routine intermediate summaries.
-- Do not repeat repository discovery already owned by the worker.
-- Do not rerun the worker's full validation without a concrete reason.
-- Keep worker briefs task-specific and link to authoritative repository material instead of copying large documents.
-- Use one writer by default. Parallelize only independent work with disjoint write sets and verified separate workspaces.
-- Check worker availability once per session or after an actual invocation failure; do not repeatedly probe unchanged configuration.
+One contract -> one dispatch -> one wait -> one delta review -> optional one correction -> one final response.
 
-## Safety boundaries
-
-The workflow does not authorize commits, pushes, merges, publishing, deployments, credential changes, production operations, or destructive external actions. Follow repository policy and explicit user authorization.
+The workflow does not authorize commits, pushes, merges, publishing, deployments, credential changes, production operations, or destructive external actions. Repository policy and explicit user authorization remain authoritative.
