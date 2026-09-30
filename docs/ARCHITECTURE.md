@@ -68,6 +68,8 @@ The normal delegated shape is one planning batch, one dispatch, one wait, one ba
 
 ## Worker model
 
+GPT-6.1 Sol (`gpt-6.1-sol`) is the planner/final reviewer for the in-Codex path and the recommended model for external planning/review. Select it in the host or CLI before starting orchestration. The skill cannot switch the active root model, and the installer does not alter the global root default. Report an unavailable requested planner/reviewer instead of silently falling back.
+
 GPT-6 Luna is the default implementation worker. Installation creates a dedicated native `gpt_luna_builder` role pinned to `gpt-6-luna` with medium reasoning effort. The package does not change the global default subagent model and no longer tries to determine a globally optimal model for each task.
 
 If Luna is unavailable, report the blocker rather than silently falling back.

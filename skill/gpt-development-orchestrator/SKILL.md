@@ -1,6 +1,6 @@
 ---
 name: gpt-development-orchestrator
-description: Thin-root development workflow for substantial multi-file work. Reuse an approved external specification when one exists; otherwise let a planner/reviewer root define the contract once, then give one coherent implementation bundle to GPT-6 Luna and review the completed patch once. Skip trivial edits and explicitly single-agent tasks.
+description: Thin-root development workflow for substantial multi-file work. Reuse an approved external specification when one exists; otherwise let a GPT-6.1 Sol planner/reviewer root define the contract once, then give one coherent implementation bundle to GPT-6 Luna and review the completed patch once. Skip trivial edits and explicitly single-agent tasks.
 metadata:
   short-description: Planner plans once, Luna builds, Reviewer accepts once
 ---
@@ -10,6 +10,13 @@ metadata:
 Use this skill for substantial multi-file features, migrations, refactors, or builds. Do not force it onto trivial edits, read-only questions, or explicitly single-agent tasks.
 
 The goal is to minimize expensive root-model activity while preserving strong planning and independent acceptance.
+
+## Model assignments
+
+- Planner and final reviewer: GPT-6.1 Sol (`gpt-6.1-sol`).
+- Implementation worker: GPT-6 Luna (`gpt-6-luna`) with medium reasoning, through `gpt_luna_builder`.
+
+For the in-Codex path, select GPT-6.1 Sol for the root session before planning. A skill cannot switch the active root model. If that model is unavailable, report the blocker rather than silently substituting another planner/reviewer. Preserve an approved external specification without regenerating it merely because it came from another model.
 
 ## Choose the path
 
@@ -29,10 +36,10 @@ Do not add an in-Codex planning or review loop unless the user asks for it.
 
 If the task still needs planning inside Codex:
 
-1. A planner/reviewer root establishes the objective, boundaries, contracts, acceptance criteria, material risks, and a dependency-ordered implementation bundle. Reuse any existing approved design instead of writing a competing one. Read references/planning.md only when planning detail is needed.
+1. The GPT-6.1 Sol planner/reviewer root establishes the objective, boundaries, contracts, acceptance criteria, material risks, and a dependency-ordered implementation bundle. Reuse any existing approved design instead of writing a competing one. Read references/planning.md only when planning detail is needed.
 2. Route the implementation bundle through the installed native `gpt_luna_builder` role, pinned to GPT-6 Luna. Do not perform dynamic per-task model ranking or cost analysis. Read references/routing.md only when routing must be verified.
 3. Give Luna one coherent end-to-end bundle. Let it own in-scope repository discovery, implementation, tests, debugging, and routine verification. Do not poll a healthy worker or duplicate its repository work. Read references/delegation.md when preparing the brief.
-4. After Luna completes, the reviewer checks the actual diff and evidence once using two lenses in one batch: specification compliance and engineering quality/security. Read references/review.md when performing acceptance.
+4. After Luna completes, GPT-6.1 Sol checks the actual diff and evidence once using two lenses in one batch: specification compliance and engineering quality/security. Read references/review.md when performing acceptance.
 5. If corrections are needed, send all concrete findings to the same worker in one request. Default to one correction cycle. Expand only for a concrete high-assurance risk.
 6. Run cross-task validation only at genuine integration boundaries and update continuity state only when work will span sessions.
 
