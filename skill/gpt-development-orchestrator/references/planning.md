@@ -1,21 +1,19 @@
 # Planning
 
-Planning exists to remove decisions from the implementation worker, not to duplicate implementation detail.
+Planning removes product, architecture, contract, and acceptance ambiguity from implementation; it should not duplicate implementation detail.
 
-Reuse an approved specification or repository plan whenever one already settles the relevant product and architecture decisions. Do not create a competing plan just because this skill is active.
+Reuse approved repository plans and designs. For new substantial work, establish only:
 
-For new substantial work, the Sol-class planner should establish only what the worker needs to execute safely:
-
-- observable objective and non-goals;
-- relevant repository evidence and existing conventions;
-- interfaces, invariants, data or API contracts;
-- failure behavior and material security or production constraints;
-- one coherent implementation bundle or a small number of dependency-ordered bundles;
+- observable outcome and non-goals;
+- authoritative paths/sections and relevant repository evidence;
+- interfaces, invariants, data/API contracts, and failure behavior;
+- material security/production constraints;
 - bounded write scope;
+- one coherent vertical bundle unless a real dependency boundary requires more;
 - acceptance criteria and focused validation commands.
 
-Prefer vertical bundles that can be implemented and verified end to end. Do not divide work by every file, function, or five-minute step.
+Prefer paths and anchors to copied prose. Prefer targeted searches/ranges to broad repository reads.
 
-A task is ready when GPT-6 Luna can discover the local implementation details, make routine coding choices from repository conventions, implement, test, and debug without inventing product or architecture decisions.
+Target at most 600 words for the plan, excluding paths and commands. Expand only when necessary to make a material contract unambiguous.
 
-Keep plans concise. Link to authoritative repository documents instead of copying them.
+A task is ready when GPT-6 Luna can discover local implementation details and make routine coding choices from repository conventions without inventing product or architecture decisions.
