@@ -1,21 +1,15 @@
-## Thin-root development orchestration
+## Token-efficient development orchestration
 
-Use the orchestration skill for substantial multi-file features, migrations, refactors, or builds. Do not force orchestration onto trivial edits, read-only questions, or explicitly single-agent work.
+Use orchestration only for substantial multi-file work; trivial edits and read-only tasks should stay single-agent.
 
-There are two supported paths.
+If an approved external specification already exists, use it directly. Prefer referencing its repository path or accessible file instead of copying it into another prompt. A suitable implementation session should implement directly without recreating the plan or adding a review loop unless requested.
 
-1. External approved specification.
-When the user supplies an approved implementation specification from outside Codex, treat that specification as authoritative. If the active Codex session is already using the implementation model, implement it directly. Do not recreate the architecture, re-plan the feature, or add an independent review unless the user explicitly asks for one.
+When planning is required, use the best suitable available planner/reviewer model for the task, risk, and budget. Explicit user or project model choices take precedence; otherwise use the capable model selected by the host/session. Do not hard-code a planner/reviewer model name.
 
-2. In-Codex thin-root orchestration.
-When planning is being done inside Codex, use GPT-6.1 Sol (`gpt-6.1-sol`) as the planner/reviewer root, focused on scope, architecture, contracts, acceptance criteria, material risk, and final acceptance. Select that root model in the host before planning; this policy cannot switch the active model. After the contract is ready, delegate one coherent implementation bundle through the native `gpt_luna_builder` role, which is pinned to GPT-6 Luna (`gpt-6-luna`) at medium reasoning. Luna owns in-scope repository discovery, implementation, testing, debugging, and routine verification.
+Normal delegated work is one planning batch, one dispatch, one wait, one batched independent acceptance review, and one final response. The configured worker owns scoped repository discovery, implementation, focused tests, debugging, and routine verification. Do not poll, replay transcripts, duplicate repository discovery, paste large specs into worker prompts, or rerun broad validation without a concrete reason.
 
-For a normal delegated phase, target one planning batch, one dispatch, one wait, one batched independent acceptance review, and one final response. Do not poll a healthy worker, request play-by-play status, duplicate its repository exploration, or split one coherent feature into tiny worker calls for visibility.
+Review the spec reference, actual diff, and concise verification evidence once. Consolidate corrections into one request by default.
 
-Review specification compliance and engineering quality as two lenses in one batched independent review. Send all findings in one correction request and default to at most one correction cycle. A second correction cycle is reserved for a concrete high-assurance issue involving architecture, authentication or authorization, payments, tenancy, secrets, destructive migrations, production behavior, or high-impact shared infrastructure.
+One writer owns a path. Parallelize only independent disjoint work in separate workspaces. Workers never approve themselves.
 
-Use GPT-6.1 Sol for planning/final review and GPT-6 Luna as the default implementation worker when available. Do not run per-task model ranking, cost analysis, quality-floor comparisons, or model-registry discovery when the approved workflow already names these models. If either required model or the native delegation path is unavailable, report the blocker rather than silently switching models.
-
-One writer owns a path at a time. Parallel workers are optional and should be used only for genuinely independent work with disjoint write sets and separate workspaces. Workers do not approve their own changes.
-
-This workflow does not authorize commits, pushes, merges, publication, deployments, credential changes, production operations, or destructive external actions. Repository policy and explicit user authorization remain authoritative.
+This policy does not authorize commit, push, merge, publish, deploy, credential changes, production operations, or destructive external actions.

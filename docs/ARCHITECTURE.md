@@ -2,18 +2,18 @@
 
 ## Purpose
 
-GPT Development Orchestrator v0.2 is a thin-root workflow for substantial software work. It separates high-leverage planning and acceptance from high-volume implementation.
+GPT Development Orchestrator is a thin-root workflow for substantial software work. It separates high-leverage planning and acceptance from high-volume implementation.
 
-The design target is simple:
+The design target is:
 
 ```text
-Planner plans once -> GPT-6 Luna builds/tests/debugs -> Reviewer accepts once
+planner/reviewer plans once -> configured worker builds/tests/debugs -> planner/reviewer accepts once
 ```
 
-When a trusted specification was already produced outside Codex, the root can be thinner still:
+When a trusted specification was already produced outside the implementation session, the root can be thinner still:
 
 ```text
-external approved spec -> GPT-6 Luna implements directly
+external approved spec -> suitable implementation model implements directly
 ```
 
 ## Authority
@@ -26,27 +26,27 @@ The implementation worker owns routine repository discovery inside its bounded s
 
 ### External approved specification
 
-Use this when ChatGPT or another trusted planning step already produced the implementation contract.
+Use this when another trusted planning step already produced the implementation contract.
 
-A GPT-6 Luna Codex session:
+A suitable implementation session:
 
 1. reads the approved specification and repository instructions;
 2. inspects only relevant code;
 3. implements the coherent bundle;
 4. runs targeted tests and debugging;
-5. returns one completion report.
+5. returns one concise completion report.
 
-No in-Codex planner/reviewer planning/review loop is required unless explicitly requested.
+No in-session planning/review loop is required unless explicitly requested.
 
-### In-Codex thin-root orchestration
+### Orchestrated thin-root path
 
-Use this when the feature still needs planning inside Codex.
+Use this when the feature still needs planning in the active development session.
 
-1. **Orient:** the planner reads only enough repository context to settle architecture and contracts.
-2. **Specify:** the planner creates a concise implementation contract.
-3. **Dispatch:** one coherent bundle goes to GPT-6 Luna.
-4. **Wait:** Luna owns implementation, tests, debugging, and routine verification without polling.
-5. **Review:** the reviewer inspects the completed diff once using specification and engineering-quality lenses.
+1. **Orient:** the planner/reviewer reads only enough repository context to settle architecture and contracts.
+2. **Specify:** it creates a concise implementation contract.
+3. **Dispatch:** one coherent bundle goes to the configured worker.
+4. **Wait:** the worker owns implementation, tests, debugging, and routine verification without polling.
+5. **Review:** the planner/reviewer inspects the completed diff once using specification and engineering-quality lenses.
 6. **Correct if needed:** send one consolidated correction request to the same worker.
 7. **Integrate:** perform broader checks only at real integration boundaries.
 
@@ -54,27 +54,27 @@ A second correction cycle is reserved for concrete high-assurance risk.
 
 ## Efficiency model
 
-The workflow reduces root activity by avoiding:
+The workflow reduces planner/reviewer activity by avoiding:
 
-- per-task model ranking and cost analysis;
-- repeated repository discovery by both root and worker;
+- per-task full model benchmarking and cost studies;
+- repeated repository discovery by both planner/reviewer and worker;
 - tiny worker tasks for each file or function;
 - progress polling;
-- separate root calls for specification and engineering review;
+- separate calls for specification and engineering review;
 - ritual reruns of the worker's full validation;
 - checkpoints after every turn.
 
 The normal delegated shape is one planning batch, one dispatch, one wait, one batched review, and one final response.
 
-## Worker model
+## Model policy
 
-GPT-6.1 Sol (`gpt-6.1-sol`) is the planner/final reviewer for the in-Codex path and the recommended model for external planning/review. Select it in the host or CLI before starting orchestration. The skill cannot switch the active root model, and the installer does not alter the global root default. Report an unavailable requested planner/reviewer instead of silently falling back.
+The planner/final reviewer is intentionally not pinned to a model name. Use the best suitable available model for the task, risk, and budget, with explicit user/project choices taking precedence. The skill cannot switch the active root model.
 
-GPT-6 Luna is the default implementation worker. Installation creates a dedicated native `gpt_luna_builder` role pinned to `gpt-6-luna` with medium reasoning effort. The package does not change the global default subagent model and no longer tries to determine a globally optimal model for each task.
+Avoid a fresh model-ranking exercise on every task. Re-evaluate only when the task requirements, available models, configured preferences, or host materially change.
 
-If Luna is unavailable, report the blocker rather than silently falling back.
+The package currently installs `gpt_luna_builder` as its default implementation role. That role is pinned to its configured model and reasoning effort, but the architecture permits a project-approved alternative worker role.
 
-The external-spec path can run directly in a Luna root session. The in-Codex path requires native delegation from the planner/reviewer to Luna.
+The external-spec path can run directly in any suitable implementation session. The orchestrated path requires a capable planner/reviewer plus a usable implementation path.
 
 ## Bundling and ownership
 
@@ -88,7 +88,7 @@ Markdown is the normal lightweight format. The existing JSON plan schema and val
 
 ## Installation
 
-The existing installer remains preview-first and reversible:
+The installer remains preview-first and reversible:
 
 - skill installation is atomic;
 - global `AGENTS.md` policy integration is opt-in;
@@ -111,8 +111,8 @@ Repository policy and explicit user authorization remain authoritative.
 ## Non-goals
 
 - A hosted orchestration service.
-- An external model router.
-- Automatic model benchmarking.
+- A mandatory external model router.
+- Automatic benchmarking on every task.
 - Continuous worker polling.
 - A mandatory workflow for trivial changes.
 - Autonomous source-control or production operations.

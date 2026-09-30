@@ -10,10 +10,7 @@
 
 ## Trust Boundaries
 
-Sol is trusted to define scope and accept work. Workers are trusted only inside
-their explicit task and write set. The installer is trusted only for the target
-paths it previews. Plan files and undo receipts are untrusted input and must be
-validated before they influence file operations.
+The planner/reviewer is trusted to define scope and accept work. Workers are trusted only inside their explicit task and write set. The installer is trusted only for the target paths it previews. Plan files and undo receipts are untrusted input and must be validated before they influence file operations.
 
 ## Principal Threats And Controls
 
@@ -26,8 +23,8 @@ validated before they influence file operations.
 | Undo destroys newer user changes | Receipt records before/after digests; refuse unsafe restore unless the current managed artifact matches the receipt |
 | Source symlink or special file redirects copying | Reject unsupported file types and validate copied relative paths |
 | Secrets leak into logs or workers | Never read `auth.json`, environment secret values, credential stores, or unrelated configuration; output paths and statuses only |
-| Worker modifies undeclared files | Explicit write sets, one owner per path, worker evidence, and Sol diff review |
-| Parallel workers overwrite each other | Validator detects intersecting write sets inside a parallel group; Sol defines shared contracts first |
+| Worker modifies undeclared files | Explicit write sets, one owner per path, worker evidence, and planner/reviewer diff review |
+| Parallel workers overwrite each other | Validator detects intersecting write sets inside a parallel group; planner/reviewer defines shared contracts first |
 | Malicious or stale plan triggers unsafe action | Strict plan schema, known roles/models, dependency validation, and no plan-driven shell execution |
 | Validation command becomes arbitrary execution | Commands remain review information; the plan validator does not execute them |
 | Delegation silently gains external authority | No automatic commits, pushes, deployments, credentials, or production mutations |
@@ -44,9 +41,6 @@ validated before they influence file operations.
 
 ## Residual Risks
 
-- A capable worker can still produce a logically incorrect patch inside its
-  write set. Sol review and repository tests reduce but cannot eliminate this.
-- Global instructions can interact with later Codex versions. The installer is
-  reversible, and the skill must be tested again when host behavior changes.
-- Model names and capabilities are host-dependent. Routing must discover or use
-  configured available models rather than assuming a historical model exists.
+- A capable worker can still produce a logically incorrect patch inside its write set. Independent planner/reviewer review and repository tests reduce but cannot eliminate this.
+- Global instructions can interact with later Codex versions. The installer is reversible, and the skill must be tested again when host behavior changes.
+- Model names and capabilities are host-dependent. Routing must use configured or available models rather than assuming a historical model exists.

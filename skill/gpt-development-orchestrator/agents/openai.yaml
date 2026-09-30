@@ -1,6 +1,4 @@
 interface:
   display_name: "GPT Development Orchestrator"
-  short_description: "GPT-6.1 Sol plans/reviews; GPT-6 Luna builds."
-  default_prompt: "Use $gpt-development-orchestrator with GPT-6.1 Sol as planner/reviewer and GPT-6 Luna at medium reasoning as worker. Reuse an approved spec when present; otherwise plan once, give one coherent bundle to Luna, wait for completion, and review once."
-policy:
-  allow_implicit_invocation: true
+  short_description: "Capable planner/reviewer plans once; configured worker builds."
+  default_prompt: "Use $gpt-development-orchestrator. Reuse an approved spec when present; otherwise use the best suitable available planner/reviewer model, plan once, give one coherent bundle to the configured worker, wait for completion, and review once."
