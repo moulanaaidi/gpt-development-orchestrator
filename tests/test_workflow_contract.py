@@ -96,6 +96,16 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("do not silently substitute models", routing)
         self.assertIn("re-evaluate routing only when", routing)
 
+    def test_efficiency_claim_is_scoped_and_reproducible(self) -> None:
+        readme = normalized("README.md").lower()
+        benchmark = normalized("docs/BENCHMARK.md").lower()
+        self.assertIn("measured context efficiency", readme)
+        self.assertIn("29.2%", readme)
+        self.assertIn("not a claim", readme)
+        self.assertIn("static context-surface", benchmark)
+        self.assertIn("runtime", benchmark)
+        self.assertIn("909500bc8cf67b8b78fb6a90645ccea288772c30", benchmark)
+
     def test_external_effect_boundaries_remain(self) -> None:
         policy = normalized("POLICY.md").lower()
         worker = normalized("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml").lower()

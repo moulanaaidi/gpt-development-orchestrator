@@ -11,6 +11,34 @@ A token-efficient development workflow for Codex.
 
 The workflow keeps high-cost reasoning at architecture and acceptance boundaries while the implementation worker owns repository discovery, implementation, tests, debugging, and routine verification.
 
+## Measured context efficiency
+
+v0.3 has a reproducible **static context-surface** benchmark against the pre-v0.3
+baseline commit `909500bc8cf67b8b78fb6a90645ccea288772c30`.
+
+| Core orchestration surface | Pre-v0.3 | v0.3 | Reduction |
+| --- | ---: | ---: | ---: |
+| Root skill | 4,428 chars | 3,620 chars | 18.2% |
+| Optional global policy | 2,877 chars | 1,570 chars | 45.4% |
+| Bundled worker role | 1,512 chars | 1,165 chars | 22.9% |
+| Task brief template | 1,100 chars | 670 chars | 39.1% |
+| **Core hot-path total** | **9,917 chars** | **7,025 chars** | **29.2%** |
+
+This measures the exact repository instruction text that forms the core
+planner/policy/worker/task-brief surface. It is a deterministic proxy for prompt
+bloat, **not** a claim that every task uses 29.2% fewer billed tokens or costs
+29.2% less. Tokenization, caching, host-added context, repository size, task mix,
+model choice, and correction cycles all affect real usage.
+
+Reproduce the comparison from a Git checkout:
+
+```powershell
+python tools/measure_context.py --base-ref 909500bc8cf67b8b78fb6a90645ccea288772c30 --head-ref HEAD
+```
+
+See [benchmark methodology](docs/BENCHMARK.md) for the exact files, limitations,
+and the runtime measurement protocol we will use for real Codex task comparisons.
+
 ## v0.3 optimization target
 
 v0.2 reduced model turns. v0.3 also reduces **prompt/context duplication** and removes planner/reviewer model pinning.
