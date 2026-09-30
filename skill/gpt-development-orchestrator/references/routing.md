@@ -1,21 +1,21 @@
 # Routing
 
-The planner and final reviewer use GPT-6.1 Sol (`gpt-6.1-sol`). Select that model for the root session; the skill does not change the active root or global model defaults. If the requested planner/reviewer is unavailable, report the blocker rather than silently substituting another model.
+Planner/final reviewer: GPT-6.1 Sol (`gpt-6.1-sol`). Implementation worker: installed `gpt_luna_builder`, pinned to GPT-6 Luna at medium reasoning. The skill cannot switch the active root or global defaults. Never silently substitute another model.
 
-The normal implementation worker is the installed native `gpt_luna_builder` role, pinned to GPT-6 Luna.
+Do not run model rankings, price comparisons, quality-floor scoring, or registry discovery per task.
 
-Do not perform a fresh model ranking, price comparison, quality-floor calculation, or model-registry exercise for each task. The workflow already separates high-leverage planning and acceptance from high-volume implementation.
+## Approved external specification
 
-## External-spec path
+An approved external specification bypasses planning regardless of which root model happens to be active.
 
-When an approved external specification is supplied and the active Codex session is GPT-6 Luna, implement directly. No subagent is required.
+- In a GPT-6 Luna root session: implement directly.
+- In a non-Luna root with native `gpt_luna_builder`: dispatch once without a planning pass. Review inside Codex only when explicitly requested.
+- When preserving Codex allowance is the priority, prefer starting with Luna directly so Sol never ingests the implementation context.
 
-## In-Codex path
+Pass a shared spec by path/anchor and a compact task capsule rather than copying the whole artifact.
 
-When a GPT-6.1 Sol root is orchestrating, confirm once per session that the host exposes the installed `gpt_luna_builder` role and native delegation. Recheck only after the host changes or a real invocation fails.
+## New in-Codex work
 
-If Luna is unavailable, report the blocker. Do not silently substitute another model.
+When planning is actually required, use the Sol root once, then one Luna worker for one coherent bundle. Confirm worker availability once per session or after a real invocation failure; do not repeatedly probe unchanged configuration.
 
-Use medium reasoning for the Luna worker, matching the installed role. Increase effort only for a concrete failed implementation or difficult local diagnosis, not by default.
-
-The worker must not recursively delegate. One Luna worker normally owns one coherent implementation bundle.
+If a required model or delegation path is unavailable, report the blocker. Do not silently fall back.
