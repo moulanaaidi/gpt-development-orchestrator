@@ -11,6 +11,9 @@
 - Absorb the safe token-efficiency ideas from the earlier WIP branch: <=500-word worker handoffs, delta-first review, and <=300-word checkpoints, without restoring its obsolete fixed-planner routing.
 - Add prompt-size regression tests so the core skill, global policy, worker instructions, and task brief do not silently grow without review.
 - Add a reproducible context-efficiency benchmark and runtime measurement protocol; current core hot-path surface is 29.2% smaller than the pre-v0.3 baseline.
+- Record Benchmark #1 as preliminary root-workload evidence (68.4% lower root input) without claiming overall efficiency because worker usage was missing and the orchestrated candidate failed independent acceptance.
+- Harden final review with criterion-by-criterion evidence and targeted invariant checks for concurrency, transactions, idempotency, state transitions, payments, auth, security, destructive migrations, and high-impact infrastructure.
+- Add runtime benchmark aggregation that preserves missing worker telemetry as unknown and blocks equal-quality efficiency claims unless both candidates pass the same acceptance gate.
 - Remove the fixed planner/reviewer model assignment. The planner/reviewer is now selected from the best suitable available model for the task, risk, and budget, respecting explicit user/project choices.
 
 ### Worker routing

@@ -118,6 +118,27 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("runtime", benchmark)
         self.assertIn("909500bc8cf67b8b78fb6a90645ccea288772c30", benchmark)
 
+    def test_review_requires_criterion_and_high_risk_invariant_verification(self) -> None:
+        review = normalized("skill/gpt-development-orchestrator/references/review.md").lower()
+        self.assertIn("passing tests and a worker-reported pass are evidence, not acceptance", review)
+        self.assertIn("criterion-by-criterion acceptance", review)
+        self.assertIn("pass, fail, or unsupported", review)
+        self.assertIn("high-risk invariants", review)
+        self.assertIn("concurrency", review)
+        self.assertIn("idempotency", review)
+        self.assertIn("payments", review)
+        self.assertIn("targeted independent check", review)
+        self.assertIn("do not accept the work", review)
+
+    def test_runtime_benchmark_claims_require_worker_usage_and_quality_parity(self) -> None:
+        benchmark = normalized("docs/BENCHMARK.md").lower()
+        self.assertIn("68.4%", benchmark)
+        self.assertIn("worker token usage was not captured", benchmark)
+        self.assertIn("failed the independent correctness acceptance gate", benchmark)
+        self.assertIn("worker usage as required", benchmark)
+        self.assertIn("same independent acceptance gate", benchmark)
+        self.assertIn("summarize_runtime_benchmark.py", benchmark)
+
     def test_external_effect_boundaries_remain(self) -> None:
         policy = normalized("POLICY.md").lower()
         worker = normalized("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml").lower()
