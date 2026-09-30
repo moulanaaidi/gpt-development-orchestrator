@@ -102,6 +102,13 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("do not poll", skill)
         self.assertIn("tiny worker calls", skill)
 
+    def test_routing_prefers_total_accepted_work_efficiency(self) -> None:
+        routing = normalized("skill/gpt-development-orchestrator/references/routing.md").lower()
+        self.assertIn("accepted-work efficiency", routing)
+        self.assertIn("not root-token reduction alone", routing)
+        self.assertIn("prefer direct implementation", routing)
+        self.assertIn("do not delegate solely to reduce root-model token usage", routing)
+
     def test_routing_avoids_per_task_benchmarking(self) -> None:
         routing = normalized("skill/gpt-development-orchestrator/references/routing.md").lower()
         self.assertIn("do not perform a fresh model ranking", routing)
@@ -129,6 +136,20 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("payments", review)
         self.assertIn("targeted independent check", review)
         self.assertIn("do not accept the work", review)
+
+    def test_review_checks_exact_value_round_trip_contracts(self) -> None:
+        review = normalized("skill/gpt-development-orchestrator/references/review.md").lower()
+        self.assertIn("exact-value and round-trip contracts", review)
+        self.assertIn("platform-specific rewriting", review)
+        self.assertIn("literal value required by the specification", review)
+
+    def test_runtime_benchmark_distinguishes_policy_and_forced_delegation(self) -> None:
+        benchmark = normalized("docs/BENCHMARK.md").lower()
+        self.assertIn("policy benchmark", benchmark)
+        self.assertIn("forced-delegation diagnostic", benchmark)
+        self.assertIn("110.2%", benchmark)
+        self.assertIn("do not force a worker", benchmark)
+        self.assertIn("normal routing policy", benchmark)
 
     def test_runtime_benchmark_claims_require_worker_usage_and_quality_parity(self) -> None:
         benchmark = normalized("docs/BENCHMARK.md").lower()

@@ -15,6 +15,23 @@ The bundled implementation worker is `gpt_luna_builder`. It is a package default
 
 Do not perform a fresh model ranking, price comparison, benchmark, or model-registry exercise for every task. Re-evaluate routing only when requirements, host capabilities, configured models, or availability materially change.
 
+## Accepted-work efficiency
+
+Optimize for total accepted-work efficiency, not root-token reduction alone.
+Delegation is not automatically better because it makes the root thinner.
+
+Prefer direct implementation when:
+- an approved specification already bounds the work;
+- the active model is suitable for implementation;
+- the change is small or medium enough that a second repository-discovery and
+  handoff cycle is likely to cost as much as the implementation.
+
+Prefer delegation when planning is still required, the implementation is large
+enough to amortize worker context/discovery, or the project explicitly requires
+a separate implementation worker.
+
+Do not delegate solely to reduce root-model token usage.
+
 ## External-spec path
 
 When an approved external specification is supplied and the active session is suitable for implementation, implement directly. No planning subagent is required.

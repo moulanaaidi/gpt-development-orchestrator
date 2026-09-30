@@ -14,6 +14,9 @@
 - Record Benchmark #1 as preliminary root-workload evidence (68.4% lower root input) without claiming overall efficiency because worker usage was missing and the orchestrated candidate failed independent acceptance.
 - Harden final review with criterion-by-criterion evidence and targeted invariant checks for concurrency, transactions, idempotency, state transitions, payments, auth, security, destructive migrations, and high-impact infrastructure.
 - Add runtime benchmark aggregation that preserves missing worker telemetry as unknown and blocks equal-quality efficiency claims unless both candidates pass the same acceptance gate.
+- Record Benchmark #2 as a forced-delegation diagnostic: root input fell 27.7%, but aggregate input rose 110.2% and the delegated candidate failed exact argument-preservation acceptance.
+- Distinguish policy benchmarks from forced-delegation diagnostics so bounded approved-spec tasks can exercise the real direct fast path instead of being artificially delegated.
+- Route for total accepted-work efficiency rather than root-token reduction alone, and add exact-value/round-trip review guidance for path, identifier, URL, header, serialization, and argument preservation.
 - Remove the fixed planner/reviewer model assignment. The planner/reviewer is now selected from the best suitable available model for the task, risk, and budget, respecting explicit user/project choices.
 
 ### Worker routing
