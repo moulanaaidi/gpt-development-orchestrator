@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased - 2026-09-30
+
+- Name GPT-6.1 Sol (`gpt-6.1-sol`) explicitly as planner and final reviewer.
+- Retain GPT-6 Luna (`gpt-6-luna`) at medium reasoning as the native implementation worker.
+- Document root-model selection without modifying global Codex defaults.
+- Preserve approved external specifications and fail clearly when requested models are unavailable.
+
 ## 0.2.0 - 2026-09-26
 
 - Redesign the workflow around thin-root orchestration: Planner plans once, GPT-6 Luna owns implementation/test/debug/verification, and Reviewer reviews once.

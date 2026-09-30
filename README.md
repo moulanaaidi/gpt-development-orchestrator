@@ -2,14 +2,19 @@
 
 A thin-root development workflow for Codex.
 
-**Planner decides. Luna builds. Reviewer accepts.**
+**Sol 6.1 plans and reviews. Luna 6 builds.**
+
+| Role | Model | Reasoning |
+| --- | --- | --- |
+| Planner / reviewer | `gpt-6.1-sol` | Host/session setting |
+| Implementation worker | `gpt-6-luna` | Medium |
 
 The workflow keeps expensive root-model activity focused on high-leverage decisions while GPT-6 Luna owns the high-volume implementation loop: repository discovery inside a bounded scope, coding, focused tests, debugging, and routine verification.
 
 It supports two practical ways of working:
 
 - **External-plan path:** create and approve the specification in ChatGPT, then give it to a GPT-6 Luna Codex session. Codex implements directly without recreating the plan.
-- **In-Codex path:** a planner/reviewer root plans once, dispatches one coherent bundle to GPT-6 Luna, waits, then reviews the completed diff once.
+- **In-Codex path:** a GPT-6.1 Sol planner/reviewer root plans once, dispatches one coherent bundle to GPT-6 Luna, waits, then reviews the completed diff once.
 
 Trivial edits and read-only questions do not need orchestration.
 
@@ -129,9 +134,17 @@ Run this in a GPT-6 Luna Codex session.
 
 When the feature still needs design inside Codex:
 
+Select GPT-6.1 Sol in the host model picker, or launch the CLI with:
+
+```powershell
+codex --model gpt-6.1-sol
+```
+
+The skill cannot switch the active root model. Installation leaves your global root and default subagent models unchanged; only the dedicated Luna role is pinned. Report unavailable requested models rather than silently falling back.
+
 ```text
 $gpt-development-orchestrator plan and execute this substantial feature.
-Keep the planner/reviewer root thin: establish the contract once, give one coherent bundle
+Use GPT-6.1 Sol for the planner/reviewer root. Establish the contract once, give one coherent bundle
 to GPT-6 Luna, wait for completion, and review the final diff once.
 ```
 

@@ -75,3 +75,9 @@ If Luna is unavailable, the workflow reports the blocker instead of silently swi
 ## ADR-013: No autonomous external effects
 
 The orchestrator does not authorize commits, pushes, merges, deployment, credential changes, destructive migrations, or production operations.
+
+## ADR-014: Explicit Sol 6.1 / Luna 6 assignments
+
+**Decision:** Use GPT-6.1 Sol (`gpt-6.1-sol`) for planning and final acceptance, and GPT-6 Luna (`gpt-6-luna`) at medium reasoning for implementation.
+
+**Reason:** The user selected this model pairing. Retain the thin-root workflow, approved-external-spec shortcut and native Luna role. Select the root model through the host rather than changing global defaults or pretending that skill text can switch an active session. Do not silently replace either requested model.

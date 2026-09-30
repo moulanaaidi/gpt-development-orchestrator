@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import unittest
+import tomllib
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,6 +17,28 @@ def normalized(relative_path: str) -> str:
 
 
 class WorkflowContractTests(unittest.TestCase):
+    def test_requested_model_pair_is_consistent(self) -> None:
+        for path in (
+            "README.md",
+            "POLICY.md",
+            "docs/ARCHITECTURE.md",
+            "skill/gpt-development-orchestrator/SKILL.md",
+            "skill/gpt-development-orchestrator/references/routing.md",
+        ):
+            with self.subTest(path=path):
+                text = read(path)
+                self.assertIn("gpt-6.1-sol", text)
+                self.assertIn("GPT-6 Luna", text)
+        worker = tomllib.loads(read("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml"))
+        self.assertEqual(worker["model"], "gpt-6-luna")
+        self.assertEqual(worker["model_reasoning_effort"], "medium")
+
+    def test_root_selection_does_not_claim_automatic_switching(self) -> None:
+        skill = normalized("skill/gpt-development-orchestrator/SKILL.md").lower()
+        self.assertIn("a skill cannot switch the active root model", skill)
+        self.assertIn("report the blocker", skill)
+        self.assertIn("codex --model gpt-6.1-sol", read("README.md"))
+
     def test_policy_scopes_orchestration_to_substantial_work(self) -> None:
         policy = normalized("POLICY.md").lower()
         skill = normalized("skill/gpt-development-orchestrator/SKILL.md").lower()
