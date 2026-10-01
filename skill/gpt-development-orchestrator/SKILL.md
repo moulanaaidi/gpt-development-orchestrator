@@ -1,6 +1,6 @@
 ---
 name: gpt-development-orchestrator
-description: Token-efficient development workflow. Reuse an approved external specification when one exists; otherwise let a capable planner/reviewer define the contract once, give one coherent implementation bundle to the configured worker, and review the final diff once.
+description: Token-efficient development workflow. Reuse an approved specification without replanning; route implementation directly or to the configured worker by accepted-work efficiency, then review delegated work once.
 metadata:
   short-description: Plan once, build once, review once
 ---
@@ -16,17 +16,18 @@ Use this skill only for substantial multi-file work. Skip trivial edits, read-on
 
 Do not hard-code a planner/reviewer model family or name. A skill cannot switch the active root model; if the current root is unsuitable, report that a capable planner/reviewer must be selected rather than inventing a fixed fallback.
 
-## Fast path: approved external specification
+## Approved external specification
 
 When the user already provides an approved external specification:
 
-1. Treat it as authoritative.
-2. If the current session is a suitable implementation model, implement directly without recreating the plan.
-3. Prefer a repository path or accessible file reference to the specification instead of pasting it into another prompt.
-4. The implementation model owns scoped discovery, implementation, focused tests, debugging, and routine verification.
-5. Return one concise completion report.
+1. Treat it as authoritative and do not recreate the plan.
+2. Choose the implementer using accepted-work efficiency: a suitable root may implement a small/medium bounded change directly; substantial work that can amortize handoff/discovery may go to the configured worker.
+3. Reference the specification by repository path or accessible file instead of copying it.
+4. The chosen implementer owns scoped discovery, implementation, focused tests, debugging, and routine verification.
+5. If delegated, the root reviews the final diff once; if direct, avoid adding an orchestration review loop.
+6. Return a completion report.
 
-Do not add an in-session planning or review loop unless the user explicitly asks for one.
+An approved specification removes planning, not routing. Delegating it is implementation routing, not a new planning cycle.
 
 ## Orchestrated path
 

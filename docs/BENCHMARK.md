@@ -195,6 +195,39 @@ not eligible for an equal-quality token-efficiency percentage. It is evidence
 that the policy selected the correct direct route and that additional
 specification/verification discipline can improve first-pass correctness.
 
+## Policy benchmark — Benchmark #4
+
+Benchmark #4 used BawaGo from baseline
+`c6050875110f5a597ab0c6a216a57254ba267b9a` with GPT-6 Sol, medium reasoning,
+for both roots. It selected a substantially larger workpack where delegation had
+a realistic opportunity to amortize implementation discovery.
+
+The installed policy still selected **direct** because the approved-spec fast
+path was written as an unconditional direct rule. Both candidates failed blinded
+independent acceptance, so neither produced accepted work.
+
+| Metric | Plain direct | Policy-selected direct | Change |
+| --- | ---: | ---: | ---: |
+| Root input tokens | 2,839,888 | 4,689,792 | **+65.1%** |
+| Root cached input | 2,770,560 | 4,583,808 | — |
+| Root output tokens | 20,670 | 23,481 | — |
+| Root reasoning output | 3,666 | 5,101 | — |
+| Aggregate reported tokens | 2,860,558 | 4,713,273 | **+64.8%** |
+| Root tool calls | 50 | 67 | — |
+| Elapsed seconds | 635.448 | 707.005 | **+11.3%** |
+| Tests reported | 9 pass | 10 pass | — |
+| Independent acceptance | **FAIL** | **FAIL** | not comparable |
+
+Benchmark #4 exposed a routing-precedence defect: accepted-work guidance already
+said sufficiently large implementation could delegate, while the external-spec
+fast path still said an approved spec should always implement directly. An
+approved specification should remove replanning, not decide the implementer.
+
+This run does not establish that delegation would have passed or been cheaper;
+no worker was dispatched. It establishes only that the prior policy prevented a
+meaningful delegation decision on this task shape. Both failed candidates retain
+their raw usage and zero accepted work.
+
 ## Runtime benchmark protocol
 
 A runtime claim should be published only after comparable real tasks have been
@@ -297,6 +330,11 @@ route. It selected direct implementation, used 33.9% more input than the plain
 direct baseline, and passed independent acceptance while the lower-usage baseline
 failed a whitespace-parsing criterion. This supports accepted-work evaluation,
 not a token-savings claim.
+
+**Routing regression evidence:** Benchmark #4 selected direct on a substantially
+larger approved workpack because the external-spec rule overrode the size-aware
+routing rule. Both candidates failed; policy input was 65.1% higher. Delegation
+benefit remains untested for that workpack.
 
 **Not yet established:** equal-quality total-token, allowance, or monetary
 savings for the orchestrator's real routing policy versus direct development.
