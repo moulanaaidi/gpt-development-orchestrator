@@ -45,11 +45,15 @@ class WorkflowContractTests(unittest.TestCase):
             self.assertIn("substantial", text)
             self.assertIn("trivial", text)
 
-    def test_external_spec_path_skips_replanning(self) -> None:
+    def test_external_spec_path_skips_replanning_without_forcing_direct(self) -> None:
         skill = normalized("skill/gpt-development-orchestrator/SKILL.md").lower()
+        routing = normalized("skill/gpt-development-orchestrator/references/routing.md").lower()
         self.assertIn("approved external specification", skill)
-        self.assertIn("implement directly without recreating the plan", skill)
-        self.assertIn("do not add an in-session planning or review loop", skill)
+        self.assertIn("do not recreate the plan", skill)
+        self.assertIn("removes planning, not routing", skill)
+        self.assertIn("does not force direct implementation", routing)
+        self.assertIn("substantial work", routing)
+        self.assertIn("configured worker", routing)
 
     def test_thin_root_shape_is_documented(self) -> None:
         policy = normalized("POLICY.md").lower()

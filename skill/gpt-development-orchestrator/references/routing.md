@@ -27,14 +27,22 @@ Prefer direct implementation when:
   handoff cycle is likely to cost as much as the implementation.
 
 Prefer delegation when planning is still required, the implementation is large
-enough to amortize worker context/discovery, or the project explicitly requires
-a separate implementation worker.
+enough to amortize worker context/discovery, spans substantial cross-module
+implementation/test/debug work, or the project explicitly requires a separate
+implementation worker.
 
 Do not delegate solely to reduce root-model token usage.
 
 ## External-spec path
 
-When an approved external specification is supplied and the active session is suitable for implementation, implement directly. No planning subagent is required.
+An approved specification removes the need to replan; it does not force direct
+implementation. Choose the implementer with the accepted-work rules above.
+
+For a small/medium bounded change, a suitable active root may implement directly.
+For substantial work where worker discovery/implementation can amortize the
+handoff, dispatch the approved specification by repository/file reference to one
+configured worker without recreating the plan, then perform one batched
+independent root review.
 
 ## Orchestrated path
 
