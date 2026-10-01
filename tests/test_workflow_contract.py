@@ -151,6 +151,15 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("do not force a worker", benchmark)
         self.assertIn("normal routing policy", benchmark)
 
+    def test_runtime_benchmark_uses_accepted_work_efficiency(self) -> None:
+        benchmark = normalized("docs/BENCHMARK.md").lower()
+        self.assertIn("policy benchmark — benchmark #3", benchmark)
+        self.assertIn("accepted-work efficiency", benchmark)
+        self.assertIn("first-pass independent acceptance", benchmark)
+        self.assertIn("total reported tokens per accepted task", benchmark)
+        self.assertIn("failed outcome and raw resource usage", benchmark)
+        self.assertIn("33.9%", benchmark)
+
     def test_runtime_benchmark_claims_require_worker_usage_and_quality_parity(self) -> None:
         benchmark = normalized("docs/BENCHMARK.md").lower()
         self.assertIn("68.4%", benchmark)
