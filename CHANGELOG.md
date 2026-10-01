@@ -28,6 +28,11 @@
 - Preserve approved external specifications and fail clearly when a required configured worker is unavailable.
 - Fix approved-spec routing precedence: an approved spec skips replanning but no longer forces direct implementation; substantial work may use the configured worker when that better amortizes discovery/implementation.
 - Record Benchmark #4 as the regression case that exposed the contradictory fast path: policy chose direct, used 65.1% more input, and both candidates failed acceptance.
+- Record Benchmark #5: the routing fix changed the same task to delegated and cut root input 70.1%, but aggregate input rose 171.4% and both candidates still failed.
+- Add mutation-surface auditing so high-risk lifecycle/state work covers adjacent existing writers, not only the new path.
+- Bound worker context/debug loops: batch discovery, avoid rereads and repeated broad passing suites, use focused iteration plus one broad validation, and stop after repeated unresolved targeted debugging.
+- Make one correction cycle the default hard stop; a second requires explicit user/project authorization for an exceptional high-assurance case.
+- Align optional global policy with approved-spec routing: approved specs skip replanning rather than forcing Direct.
 
 ## 0.2.0 - 2026-09-26
 

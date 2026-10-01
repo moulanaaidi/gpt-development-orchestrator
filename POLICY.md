@@ -1,14 +1,16 @@
 ## Token-efficient development orchestration
 
-Use orchestration only for substantial multi-file work; trivial edits and read-only tasks should stay single-agent.
+Use orchestration only for substantial multi-file work; trivial edits and read-only tasks stay single-agent.
 
-If an approved external specification already exists, use it directly. Prefer referencing its repository path or accessible file instead of copying it into another prompt. A suitable implementation session should implement directly without recreating the plan or adding a review loop unless requested.
+An approved external spec skips replanning; it does not force Direct. A suitable root may implement small/medium bounded work. Substantial work may go to the configured worker when discovery/implementation can amortize the handoff. Reference specs by path/file instead of copying them.
 
-When planning is required, use the best suitable available planner/reviewer model for the task, risk, and budget. Explicit user or project model choices take precedence; otherwise use the capable model selected by the host/session. Do not hard-code a planner/reviewer model name.
+For high-risk lifecycle/state, transaction, idempotency, auth, or payment changes, inventory every relevant mutation path, including adjacent existing flows. Apply the same transition, concurrency, atomicity, and error-contract rules to each and cover material paths with focused tests.
 
-Normal delegated work is one planning batch, one dispatch, one wait, one batched independent acceptance review, and one final response. The configured worker owns scoped repository discovery, implementation, focused tests, debugging, and routine verification. Do not poll, replay transcripts, duplicate repository discovery, paste large specs into worker prompts, or rerun broad validation without a concrete reason.
+When planning is needed, use the best suitable available planner/reviewer for task, risk, and budget. Explicit user/project model choices take precedence; do not hard-code a model.
 
-Review the spec reference, actual diff, and concise verification evidence once. Consolidate corrections into one request by default.
+Normal delegated work is one planning batch, one dispatch, one blocking wait, one batched independent review, and one final response. The worker owns scoped discovery, implementation, focused tests, debugging, and verification. Do not poll, replay transcripts, duplicate broad discovery, paste large specs, reread unchanged files, or repeatedly rerun broad passing validation.
+
+Review the spec reference, diff, and concise evidence once. Send one consolidated correction by default. If material acceptance still fails, stop and report not accepted. A second correction requires explicit user/project authorization for an exceptional high-assurance case.
 
 One writer owns a path. Parallelize only independent disjoint work in separate workspaces. Workers never approve themselves.
 
