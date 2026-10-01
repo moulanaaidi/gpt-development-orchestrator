@@ -17,6 +17,8 @@
 - Record Benchmark #2 as a forced-delegation diagnostic: root input fell 27.7%, but aggregate input rose 110.2% and the delegated candidate failed exact argument-preservation acceptance.
 - Distinguish policy benchmarks from forced-delegation diagnostics so bounded approved-spec tasks can exercise the real direct fast path instead of being artificially delegated.
 - Route for total accepted-work efficiency rather than root-token reduction alone, and add exact-value/round-trip review guidance for path, identifier, URL, header, serialization, and argument preservation.
+- Record Benchmark #3 as the first real-policy benchmark: policy selected direct execution, used 33.9% more input, and passed independent acceptance while the lower-usage plain-direct candidate failed.
+- Promote accepted-work efficiency (first-pass acceptance and resource use per accepted task/work unit) above raw token reduction for runtime interpretation.
 - Remove the fixed planner/reviewer model assignment. The planner/reviewer is now selected from the best suitable available model for the task, risk, and budget, respecting explicit user/project choices.
 
 ### Worker routing

@@ -155,6 +155,46 @@ bounded work and that reducing root tokens alone is not an efficiency objective.
 It also adds an acceptance-review regression case for exact literal/round-trip
 requirements.
 
+## Policy benchmark — Benchmark #3
+
+Benchmark #3 was run on 2026-09-30 against BawaGo from baseline
+`c6050875110f5a597ab0c6a216a57254ba267b9a`. Both root sessions used GPT-6 Sol,
+medium reasoning. The task hardened the shared environment-file parser and
+`configctl validate-env` behavior under a bounded approved workpack.
+
+The orchestrator was allowed to apply its real routing policy. It selected the
+**direct** path because the task had an approved bounded specification and a
+suitable active implementation model. No worker was dispatched.
+
+| Metric | Plain direct | Policy-selected direct | Change |
+| --- | ---: | ---: | ---: |
+| Root input tokens | 692,851 | 927,432 | **+33.9%** |
+| Root cached input | 647,424 | 892,416 | — |
+| Root output tokens | 10,072 | 12,088 | — |
+| Root reasoning output | 1,390 | 1,938 | — |
+| Aggregate reported tokens | 702,923 | 939,520 | **+33.7%** |
+| Root tool calls | 21 | 25 | — |
+| Elapsed seconds | 548.614 | 675.758 | **+23.2%** |
+| Tests reported | 23 pass | 24 pass | — |
+| Independent acceptance | **FAIL** | **PASS** | not equal quality |
+
+The plain-direct candidate failed criterion 2 because its unquoted inline-comment
+parser recognized only ASCII space/tab before `#`; a vertical-tab whitespace
+boundary was missed. Its tests remained green. The policy-selected direct
+candidate handled the broader whitespace contract and passed all six independent
+acceptance criteria.
+
+This benchmark does not show raw token savings: policy execution used more
+root context and more elapsed time. It does show why runtime evaluation must use
+**accepted-work efficiency** rather than raw token count alone. The cheaper
+candidate produced rejected work; the higher-usage candidate produced accepted
+work.
+
+Because both candidates did not pass the same acceptance gate, Benchmark #3 is
+not eligible for an equal-quality token-efficiency percentage. It is evidence
+that the policy selected the correct direct route and that additional
+specification/verification discipline can improve first-pass correctness.
+
 ## Runtime benchmark protocol
 
 A runtime claim should be published only after comparable real tasks have been
@@ -186,13 +226,32 @@ Capture from actual session/provider usage records:
 - accepted implementation/test lines or another declared work unit;
 - validation outcome and final acceptance status.
 
-Recommended normalized metrics:
+## Accepted-work efficiency
 
+The primary runtime question is not "which treatment used fewer tokens?" but
+"what resources were required to produce independently accepted work?"
+
+Raw token and elapsed-time comparisons remain important, but a lower-usage
+candidate that fails acceptance must not be presented as more efficient delivery.
+
+Track, where evidence permits:
+
+- first-pass independent acceptance (PASS/FAIL);
+- accepted tasks / attempted tasks;
+- total reported tokens per accepted task;
+- total reported tokens per 1,000 accepted implementation/test lines;
 - planner/reviewer input per 1,000 accepted implementation/test lines;
 - worker input per 1,000 accepted implementation/test lines;
-- total reported tokens per 1,000 accepted implementation/test lines;
 - root turns per accepted workpack;
-- correction cycles per accepted workpack.
+- correction cycles per accepted workpack;
+- elapsed time per accepted task.
+
+When a candidate fails acceptance, its accepted implementation/test lines are
+zero for normalization purposes. Do not divide by zero or manufacture an
+"efficiency" ratio; report the failed outcome and raw resource usage instead.
+
+Recommended normalized metrics should be aggregated only across task pairs that
+meet the declared quality-comparability rule.
 
 If pricing is used, record the exact dated rate source and distinguish API-equivalent
 estimates from ChatGPT/Codex subscription usage. Do not convert missing usage into
@@ -232,6 +291,12 @@ increased aggregate input by 110.2%, increased aggregate reported tokens by
 109.5%, and failed independent acceptance. Because the task qualified for the
 documented direct external-spec path, this diagnoses delegation overhead rather
 than the normal routing policy.
+
+**Policy evidence:** Benchmark #3 allowed the real routing policy to choose its
+route. It selected direct implementation, used 33.9% more input than the plain
+direct baseline, and passed independent acceptance while the lower-usage baseline
+failed a whitespace-parsing criterion. This supports accepted-work evaluation,
+not a token-savings claim.
 
 **Not yet established:** equal-quality total-token, allowance, or monetary
 savings for the orchestrator's real routing policy versus direct development.
