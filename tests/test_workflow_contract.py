@@ -81,6 +81,10 @@ class WorkflowContractTests(unittest.TestCase):
         worker = normalized("skill/gpt-development-orchestrator/agents/gpt_luna_builder.toml").lower()
         for term in ("discovery", "implementation", "debug", "verification"):
             self.assertIn(term, worker)
+        self.assertIn("every relevant write path", worker)
+        self.assertIn("adjacent existing flows", worker)
+        self.assertIn("do not reread unchanged files", worker)
+        self.assertIn("one broad validation at the end", worker)
 
     def test_review_is_one_batch_with_two_lenses(self) -> None:
         review = normalized("skill/gpt-development-orchestrator/references/review.md").lower()
@@ -129,6 +133,13 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("runtime", benchmark)
         self.assertIn("909500bc8cf67b8b78fb6a90645ccea288772c30", benchmark)
 
+    def test_global_policy_matches_routing_and_correction_limit(self) -> None:
+        policy = normalized("POLICY.md").lower()
+        self.assertIn("skips replanning; it does not force direct", policy)
+        self.assertIn("every relevant mutation path", policy)
+        self.assertIn("one blocking wait", policy)
+        self.assertIn("stop and report not accepted", policy)
+
     def test_review_requires_criterion_and_high_risk_invariant_verification(self) -> None:
         review = normalized("skill/gpt-development-orchestrator/references/review.md").lower()
         self.assertIn("passing tests and a worker-reported pass are evidence, not acceptance", review)
@@ -139,6 +150,9 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("idempotency", review)
         self.assertIn("payments", review)
         self.assertIn("targeted independent check", review)
+        self.assertIn("mutation-surface audit", review)
+        self.assertIn("adjacent existing flows", review)
+        self.assertIn("stop and report not accepted", review)
         self.assertIn("do not accept the work", review)
 
     def test_review_checks_exact_value_round_trip_contracts(self) -> None:

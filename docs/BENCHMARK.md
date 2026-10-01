@@ -228,6 +228,37 @@ no worker was dispatched. It establishes only that the prior policy prevented a
 meaningful delegation decision on this task shape. Both failed candidates retain
 their raw usage and zero accepted work.
 
+## Routing-fix regression — Benchmark #5
+
+Benchmark #5 reused the Benchmark #4 task byte-for-byte (SHA-256
+`af1c2bd18123c685f35ea0f9fd7b435b4eec009b3a04d820c2f0a5c64f4002c7`) on the
+same BawaGo baseline. The corrected policy selected **delegated**, proving the
+approved-spec routing-precedence fix was exercised.
+
+| Metric | Plain direct | Policy delegated | Change |
+| --- | ---: | ---: | ---: |
+| Root input tokens | 3,580,330 | 1,072,136 | **-70.1%** |
+| Worker input tokens | N/A | 8,644,295 | — |
+| Aggregate input tokens | 3,580,330 | 9,716,431 | **+171.4%** |
+| Aggregate reported tokens | 3,602,544 | 9,757,097 | **+170.8%** |
+| Elapsed seconds | 623.857 | 1,139.856 | **+82.7%** |
+| Root tool calls | 55 | 32 | — |
+| Worker tool calls | N/A | 102 | — |
+| Correction cycles | 0 | 2 | protocol deviation |
+| Independent acceptance | **FAIL** | **FAIL** | zero accepted work |
+
+The routing fix worked mechanically and reduced root input substantially, but
+delegation did not improve accepted-work efficiency. The worker consumed 8.64M
+input tokens across 105 model responses / 102 exec calls, and the policy exceeded
+the one-correction target.
+
+Blinded review showed a shared correctness pattern rather than a Luna-only
+failure: both candidates missed existing risk-clarification writes that could
+bypass the new case lifecycle rules. The delegated candidate preserved exact
+resolution/reopen values better; the direct candidate provided better typed
+transition errors. This motivates mutation-surface auditing across all writers of
+a protected state, plus tighter worker context/debug-loop discipline.
+
 ## Runtime benchmark protocol
 
 A runtime claim should be published only after comparable real tasks have been
@@ -335,6 +366,11 @@ not a token-savings claim.
 larger approved workpack because the external-spec rule overrode the size-aware
 routing rule. Both candidates failed; policy input was 65.1% higher. Delegation
 benefit remains untested for that workpack.
+
+**Routing-fix evidence:** Benchmark #5 changed the same-task policy route from
+direct to delegated and cut root input 70.1%, but aggregate input rose 171.4% and
+both candidates failed. The routing precedence fix worked; worker/reviewer
+accepted-work efficiency remains unproven.
 
 **Not yet established:** equal-quality total-token, allowance, or monetary
 savings for the orchestrator's real routing policy versus direct development.
